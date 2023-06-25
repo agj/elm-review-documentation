@@ -952,6 +952,16 @@ a = 2
 """
                     |> Review.Test.runWithProjectData packageProjectWithoutFiles rule
                     |> Review.Test.expectNoErrors
+        , test "should not report links to packages using absolute-path URLs" <|
+            \() ->
+                """module A exposing (..)
+{-|
+[link](/packages/elm/core/latest/Basics#Int)
+-}
+a = 2
+"""
+                    |> Review.Test.runWithProjectData packageProjectWithoutFiles rule
+                    |> Review.Test.expectNoErrors
         , test "should report links to an external resource without a protocol" <|
             \() ->
                 """module A exposing (..)
