@@ -3,7 +3,7 @@ module Docs.Utils.Link exposing
     , Link
     , SubTarget(..)
     , findLinks
-    , packageLinkParser
+    , urlToExternalPackageReference
     )
 
 import Elm.Syntax.ModuleName exposing (ModuleName)
@@ -299,9 +299,9 @@ type ExternalPackageReference
         }
 
 
-packageLinkParser : Parser ExternalPackageReference
-packageLinkParser =
-    Debug.todo "parser"
+urlToExternalPackageReference : String -> Maybe ExternalPackageReference
+urlToExternalPackageReference url =
+    Debug.todo "parsing"
 
 
 ignoreDotSlash : Parser Bool

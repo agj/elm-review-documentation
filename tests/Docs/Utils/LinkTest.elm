@@ -1,15 +1,26 @@
-module Docs.Utils.LinkTest exposing (packageLinkParserTest)
+module Docs.Utils.LinkTest exposing (urlToExternalPackageReferenceTest)
 
-import Docs.Utils.Link exposing (packageLinkParser)
+import Docs.Utils.Link exposing (urlToExternalPackageReference)
 import Expect
-import Parser exposing (Parser)
 import Test exposing (Test, describe, test)
 
 
-packageLinkParserTest : Test
-packageLinkParserTest =
+urlToExternalPackageReferenceTest : Test
+urlToExternalPackageReferenceTest =
     let
-        validUrls =
+        urlsWithAuthorAndName =
+            [ "/packages/elm/regex"
+            , "/packages/elm/regex/"
+            ]
+
+        urlsWithAuthorNameAndVersion =
+            [ "/packages/elm/regex/latest"
+            , "/packages/elm/regex/latest/"
+            , "/packages/elm/regex/1.1.1"
+            , "/packages/elm/regex/1.1.1/"
+            ]
+
+        other =
             [ "/packages/elm/regex/latest/Regex"
             , "/packages/elm/regex/latest/Regex#Regex"
             , "/packages/elm/regex/latest/Regex#replace"
@@ -18,28 +29,15 @@ packageLinkParserTest =
             , "/packages/mdgriffith/elm-ui"
             ]
     in
-    describe "packageLinkParser"
-        (validUrls
+    describe "urlToExternalPackageReference"
+        (urlsWithAuthorAndName
+            ++ urlsWithAuthorNameAndVersion
+            ++ other
             |> List.map
                 (\url ->
                     test ("should parse absolute-path URL: " ++ url) <|
                         \_ ->
-                            Parser.run packageLinkParser url
-                                |> isOk
-                                |> Expect.equal True
+                            urlToExternalPackageReference url
+                                |> Expect.notEqual Nothing
                 )
         )
-
-
-
--- UTILS
-
-
-isOk : Result x a -> Bool
-isOk result =
-    case result of
-        Ok _ ->
-            True
-
-        Err _ ->
-            False
