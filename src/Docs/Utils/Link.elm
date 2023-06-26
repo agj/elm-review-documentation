@@ -305,17 +305,59 @@ type ExternalPackageReference
 urlToExternalPackageReference : String -> Maybe ExternalPackageReference
 urlToExternalPackageReference url =
     let
-        parser =
+        authorName =
             Url.Parser.s "packages"
                 </> Url.Parser.string
                 </> Url.Parser.string
-                |> Url.Parser.map
-                    (\author name ->
-                        ExternalPackageVersionSelectionReference
-                            { author = author
-                            , name = name
-                            }
-                    )
+
+        authorNameVersion =
+            authorName
+                </> Url.Parser.string
+
+        authorNameVersionSection =
+            authorNameVersion
+                </> Url.Parser.string
+                </> Url.Parser.fragment identity
+
+        parser =
+            Url.Parser.oneOf
+                [ authorName
+                    |> Url.Parser.map
+                        (\author name ->
+                            ExternalPackageVersionSelectionReference
+                                { author = author
+                                , name = name
+                                }
+                        )
+                , authorNameVersion
+                    |> Url.Parser.map
+                        (\author name version ->
+                            ExternalPackageVersionReference
+                                { author = author
+                                , name = name
+                                , version = version
+                                }
+                        )
+                , authorNameVersionSection
+                    |> Url.Parser.map
+                        (\author name version module_ section ->
+                            let
+                                moduleSection =
+                                    case section of
+                                        Just s ->
+                                            module_ ++ "#" ++ s
+
+                                        Nothing ->
+                                            module_
+                            in
+                            ExternalPackageSectionReference
+                                { author = author
+                                , name = name
+                                , version = version
+                                , section = moduleSection
+                                }
+                        )
+                ]
     in
     Url.fromString url
         |> Maybe.andThen (Url.Parser.parse parser)
