@@ -3,6 +3,7 @@ module Docs.Utils.Link exposing
     , Link
     , SubTarget(..)
     , findLinks
+    , packageLinkParser
     )
 
 import Elm.Syntax.ModuleName exposing (ModuleName)
@@ -278,6 +279,29 @@ linkRegex : Regex
 linkRegex =
     Regex.fromString "https://package\\.elm-lang\\.org/packages/([\\w-]+/[\\w-]+)/(latest|\\w+\\.\\w+\\.\\w+)(/(.*))?"
         |> Maybe.withDefault Regex.never
+
+
+type ExternalPackageReference
+    = ExternalPackageVersionSelectionReference
+        { author : String
+        , name : String
+        }
+    | ExternalPackageVersionReference
+        { author : String
+        , name : String
+        , version : String
+        }
+    | ExternalPackageSectionReference
+        { author : String
+        , name : String
+        , version : String
+        , section : String
+        }
+
+
+packageLinkParser : Parser ExternalPackageReference
+packageLinkParser =
+    Debug.todo "parser"
 
 
 ignoreDotSlash : Parser Bool
