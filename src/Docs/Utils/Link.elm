@@ -303,7 +303,7 @@ type ExternalPackageReference
 
 
 urlToExternalPackageReference : String -> Maybe ExternalPackageReference
-urlToExternalPackageReference url =
+urlToExternalPackageReference urlString =
     let
         authorName =
             Url.Parser.s "packages"
@@ -358,9 +358,24 @@ urlToExternalPackageReference url =
                                 }
                         )
                 ]
+
+        urlMaybe =
+            case Url.fromString urlString of
+                Just u ->
+                    Just u
+
+                Nothing ->
+                    Url.fromString ("https://package.elm-lang.org" ++ urlString)
     in
-    Url.fromString url
-        |> Maybe.andThen (Url.Parser.parse parser)
+    urlMaybe
+        |> Maybe.andThen
+            (\url ->
+                if url.host == "package.elm-lang.org" then
+                    Url.Parser.parse parser url
+
+                else
+                    Nothing
+            )
 
 
 ignoreDotSlash : Parser Bool
