@@ -1,5 +1,6 @@
 module Docs.Utils.Link exposing
-    ( FileTarget(..)
+    ( ExternalPackageReference(..)
+    , FileTarget(..)
     , Link
     , SubTarget(..)
     , findLinks
@@ -11,6 +12,8 @@ import Elm.Syntax.Node exposing (Node(..))
 import Elm.Syntax.Range exposing (Location, Range)
 import Parser exposing ((|.), (|=), Parser)
 import Regex exposing (Regex)
+import Url
+import Url.Parser exposing ((</>))
 
 
 addOffset : Int -> Range -> Range
@@ -301,7 +304,21 @@ type ExternalPackageReference
 
 urlToExternalPackageReference : String -> Maybe ExternalPackageReference
 urlToExternalPackageReference url =
-    Debug.todo "parsing"
+    let
+        parser =
+            Url.Parser.s "packages"
+                </> Url.Parser.string
+                </> Url.Parser.string
+                |> Url.Parser.map
+                    (\author name ->
+                        ExternalPackageVersionSelectionReference
+                            { author = author
+                            , name = name
+                            }
+                    )
+    in
+    Url.fromString url
+        |> Maybe.andThen (Url.Parser.parse parser)
 
 
 ignoreDotSlash : Parser Bool

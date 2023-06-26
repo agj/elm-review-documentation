@@ -1,6 +1,6 @@
 module Docs.Utils.LinkTest exposing (urlToExternalPackageReferenceTest)
 
-import Docs.Utils.Link exposing (urlToExternalPackageReference)
+import Docs.Utils.Link exposing (ExternalPackageReference(..), urlToExternalPackageReference)
 import Expect
 import Test exposing (Test, describe, test)
 
@@ -9,7 +9,9 @@ urlToExternalPackageReferenceTest : Test
 urlToExternalPackageReferenceTest =
     let
         urlsWithAuthorAndName =
-            [ "/packages/elm/regex"
+            [ "https://package.elm-lang.org/packages/elm/regex"
+            , "https://package.elm-lang.org/packages/elm/regex/"
+            , "/packages/elm/regex"
             , "/packages/elm/regex/"
             ]
 
@@ -31,13 +33,18 @@ urlToExternalPackageReferenceTest =
     in
     describe "urlToExternalPackageReference"
         (urlsWithAuthorAndName
-            ++ urlsWithAuthorNameAndVersion
-            ++ other
             |> List.map
                 (\url ->
-                    test ("should parse absolute-path URL: " ++ url) <|
+                    test ("should parse URLs with author and name: " ++ url) <|
                         \_ ->
                             urlToExternalPackageReference url
-                                |> Expect.notEqual Nothing
+                                |> Expect.equal
+                                    (Just
+                                        (ExternalPackageVersionSelectionReference
+                                            { author = "elm"
+                                            , name = "regex"
+                                            }
+                                        )
+                                    )
                 )
         )
