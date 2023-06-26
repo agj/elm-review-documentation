@@ -16,35 +16,76 @@ urlToExternalPackageReferenceTest =
             ]
 
         urlsWithAuthorNameAndVersion =
-            [ "/packages/elm/regex/latest"
+            [ "https://package.elm-lang.org/packages/elm/regex/latest"
+            , "https://package.elm-lang.org/packages/elm/regex/latest/"
+            , "https://package.elm-lang.org/packages/elm/regex/1.1.1"
+            , "https://package.elm-lang.org/packages/elm/regex/1.1.1/"
+            , "/packages/elm/regex/latest"
             , "/packages/elm/regex/latest/"
             , "/packages/elm/regex/1.1.1"
             , "/packages/elm/regex/1.1.1/"
             ]
 
-        other =
-            [ "/packages/elm/regex/latest/Regex"
-            , "/packages/elm/regex/latest/Regex#Regex"
+        urlsWithAuthorNameVersionAndSection =
+            [ "https://package.elm-lang.org/packages/elm/regex/latest/Regex#replace"
+            , "https://package.elm-lang.org/packages/elm/regex/1.1.1/Regex#replace"
             , "/packages/elm/regex/latest/Regex#replace"
-            , "/packages/mdgriffith/elm-ui/latest/Element-Background#image"
-            , "/packages/mdgriffith/elm-ui/1.1.7/Element-Background"
-            , "/packages/mdgriffith/elm-ui"
+            , "/packages/elm/regex/1.1.1/Regex#replace"
             ]
     in
     describe "urlToExternalPackageReference"
-        (urlsWithAuthorAndName
-            |> List.map
-                (\url ->
-                    test ("should parse URLs with author and name: " ++ url) <|
-                        \_ ->
-                            urlToExternalPackageReference url
-                                |> Expect.equal
-                                    (Just
-                                        (ExternalPackageVersionSelectionReference
-                                            { author = "elm"
-                                            , name = "regex"
-                                            }
+        [ describe "URLs with author and name"
+            (urlsWithAuthorAndName
+                |> List.map
+                    (\url ->
+                        test ("should parse: " ++ url) <|
+                            \_ ->
+                                urlToExternalPackageReference url
+                                    |> Expect.equal
+                                        (Just
+                                            (ExternalPackageVersionSelectionReference
+                                                { author = "elm"
+                                                , name = "regex"
+                                                }
+                                            )
                                         )
-                                    )
-                )
-        )
+                    )
+            )
+        , describe "URLs with author, name and version"
+            (urlsWithAuthorNameAndVersion
+                |> List.map
+                    (\url ->
+                        test ("should parse: " ++ url) <|
+                            \_ ->
+                                urlToExternalPackageReference url
+                                    |> Expect.equal
+                                        (Just
+                                            (ExternalPackageVersionReference
+                                                { author = "elm"
+                                                , name = "regex"
+                                                , version = "1.1.1"
+                                                }
+                                            )
+                                        )
+                    )
+            )
+        , describe "URLs with author, name, version and section"
+            (urlsWithAuthorNameVersionAndSection
+                |> List.map
+                    (\url ->
+                        test ("should parse: " ++ url) <|
+                            \_ ->
+                                urlToExternalPackageReference url
+                                    |> Expect.equal
+                                        (Just
+                                            (ExternalPackageSectionReference
+                                                { author = "elm"
+                                                , name = "regex"
+                                                , version = "1.1.1"
+                                                , section = "Regex#replace"
+                                                }
+                                            )
+                                        )
+                    )
+            )
+        ]
