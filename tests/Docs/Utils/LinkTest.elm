@@ -16,20 +16,19 @@ urlToExternalPackageReferenceTest =
             ]
 
         urlsWithAuthorNameAndVersion =
-            [ "https://package.elm-lang.org/packages/elm/regex/latest"
-            , "https://package.elm-lang.org/packages/elm/regex/latest/"
-            , "https://package.elm-lang.org/packages/elm/regex/1.1.1"
+            [ "https://package.elm-lang.org/packages/elm/regex/1.1.1"
             , "https://package.elm-lang.org/packages/elm/regex/1.1.1/"
-            , "/packages/elm/regex/latest"
-            , "/packages/elm/regex/latest/"
             , "/packages/elm/regex/1.1.1"
             , "/packages/elm/regex/1.1.1/"
             ]
 
-        urlsWithAuthorNameVersionAndSection =
-            [ "https://package.elm-lang.org/packages/elm/regex/latest/Regex#replace"
-            , "https://package.elm-lang.org/packages/elm/regex/1.1.1/Regex#replace"
-            , "/packages/elm/regex/latest/Regex#replace"
+        urlsWithAuthorNameVersionAndModule =
+            [ "https://package.elm-lang.org/packages/elm/regex/1.1.1/Regex"
+            , "/packages/elm/regex/1.1.1/Regex"
+            ]
+
+        urlsWithAuthorNameVersionModuleAndSection =
+            [ "https://package.elm-lang.org/packages/elm/regex/1.1.1/Regex#replace"
             , "/packages/elm/regex/1.1.1/Regex#replace"
             ]
     in
@@ -70,7 +69,26 @@ urlToExternalPackageReferenceTest =
                     )
             )
         , describe "URLs with author, name, version and section"
-            (urlsWithAuthorNameVersionAndSection
+            (urlsWithAuthorNameVersionAndModule
+                |> List.map
+                    (\url ->
+                        test ("should parse: " ++ url) <|
+                            \_ ->
+                                urlToExternalPackageReference url
+                                    |> Expect.equal
+                                        (Just
+                                            (ExternalPackageSectionReference
+                                                { author = "elm"
+                                                , name = "regex"
+                                                , version = "1.1.1"
+                                                , section = "Regex"
+                                                }
+                                            )
+                                        )
+                    )
+            )
+        , describe "URLs with author, name, version, module and section"
+            (urlsWithAuthorNameVersionModuleAndSection
                 |> List.map
                     (\url ->
                         test ("should parse: " ++ url) <|
