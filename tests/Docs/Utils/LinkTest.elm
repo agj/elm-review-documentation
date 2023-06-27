@@ -31,6 +31,26 @@ urlToExternalPackageReferenceTest =
             [ "https://package.elm-lang.org/packages/elm/regex/1.1.1/Regex#replace"
             , "/packages/elm/regex/1.1.1/Regex#replace"
             ]
+
+        invalidPackageUrls =
+            [ "https://www.example.com/packages/elm/regex"
+            , "https://www.example.com/packages/elm/regex/1.1.1/"
+            , "https://www.example.com/packages/elm/regex/1.1.1/Regex"
+            , "https://www.example.com/packages/elm/regex/1.1.1/Regex#replace"
+            , "https://package.elm-lang.org/wrong/elm/regex"
+            , "https://package.elm-lang.org/wrong/elm/regex/1.1.1/"
+            , "https://package.elm-lang.org/wrong/elm/regex/1.1.1/Regex"
+            , "https://package.elm-lang.org/wrong/elm/regex/1.1.1/Regex#replace"
+            , "https://package.elm-lang.org/packages/elm/"
+            , "https://package.elm-lang.org/packages/elm/regex/1.1.1/#replace"
+            , "ftp://package.elm-lang.org/packages/elm/regex/1.1.1/Regex#replace"
+            , "/wrong/elm/regex"
+            , "/wrong/elm/regex/1.1.1/"
+            , "/wrong/elm/regex/1.1.1/Regex"
+            , "/wrong/elm/regex/1.1.1/Regex#replace"
+            , "/packages/elm/"
+            , "/packages/elm/regex/1.1.1/#replace"
+            ]
     in
     describe "urlToExternalPackageReference"
         [ describe "URLs with author and name"
@@ -104,6 +124,16 @@ urlToExternalPackageReferenceTest =
                                                 }
                                             )
                                         )
+                    )
+            )
+        , describe "Invalid package URLs"
+            (invalidPackageUrls
+                |> List.map
+                    (\url ->
+                        test ("should fail to parse: " ++ url) <|
+                            \_ ->
+                                urlToExternalPackageReference url
+                                    |> Expect.equal Nothing
                     )
             )
         ]
