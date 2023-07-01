@@ -557,10 +557,26 @@ a = 2
                             , under = "https://package.elm-lang.org/packages/author/package/1.0.0/Unknown"
                             }
                         ]
+        , test "should report links to unknown modules for the current version (using absolute-path URLs)" <|
+            \() ->
+                [ """module A exposing (..)
+{-| [link](/packages/author/package/1.0.0/Unknown)
+-}
+a = 2
+""" ]
+                    |> Review.Test.runOnModulesWithProjectData packageProjectWithoutFiles rule
+                    |> Review.Test.expectErrors
+                        [ Review.Test.error
+                            { message = "Link points to non-existing module Unknown"
+                            , details = [ "This is a dead link." ]
+                            , under = "/packages/author/package/1.0.0/Unknown"
+                            }
+                        ]
         , test "should not report links to known modules for the current version" <|
             \() ->
                 [ """module A exposing (..)
 {-| [link](https://package.elm-lang.org/packages/author/package/1.0.0/A)
+[link](/packages/author/package/1.0.0/A)
 -}
 a = 2
 """ ]
@@ -570,6 +586,7 @@ a = 2
             \() ->
                 [ """module A exposing (..)
 {-| [link](https://package.elm-lang.org/packages/author/package/1.0.0/A/)
+[link](/packages/author/package/1.0.0/A/)
 -}
 a = 2
 """ ]
@@ -590,10 +607,26 @@ a = 2
                             , under = "https://package.elm-lang.org/packages/author/package/latest/Unknown"
                             }
                         ]
+        , test "should report links to unknown modules for latest (using absolute-path URLs)" <|
+            \() ->
+                """module A exposing (..)
+{-| [link](/packages/author/package/latest/Unknown)
+-}
+a = 2
+"""
+                    |> Review.Test.runWithProjectData packageProjectWithoutFiles rule
+                    |> Review.Test.expectErrors
+                        [ Review.Test.error
+                            { message = "Link points to non-existing module Unknown"
+                            , details = [ "This is a dead link." ]
+                            , under = "/packages/author/package/latest/Unknown"
+                            }
+                        ]
         , test "should not report links for different version of the package" <|
             \() ->
                 """module A exposing (..)
 {-| [link](https://package.elm-lang.org/packages/author/package/2.3.4/Unknown)
+[link](/packages/author/package/2.3.4/Unknown)
 -}
 a = 2
 """
@@ -616,10 +649,28 @@ a = 2
                             , under = "https://package.elm-lang.org/packages/author/package/1.0.0/#unknown"
                             }
                         ]
+        , test "should report links to unknown section of README (using absolute-path URLs)" <|
+            \() ->
+                """module A exposing (..)
+{-| [link](/packages/author/package/1.0.0/#unknown)
+-}
+a = 2
+"""
+                    |> Review.Test.runWithProjectData
+                        (Project.addReadme { path = "README.md", content = "# A" } packageProjectWithoutFiles)
+                        rule
+                    |> Review.Test.expectErrors
+                        [ Review.Test.error
+                            { message = "Link points to a non-existing section or element"
+                            , details = [ "This is a dead link." ]
+                            , under = "/packages/author/package/1.0.0/#unknown"
+                            }
+                        ]
         , test "should not report links to known sections of README" <|
             \() ->
                 """module A exposing (..)
 {-| [link](https://package.elm-lang.org/packages/author/package/2.3.4/#a)
+[link](/packages/author/package/2.3.4/#a)
 -}
 a = 2
 """
@@ -631,6 +682,7 @@ a = 2
             \() ->
                 """module A exposing (..)
 {-| [link](https://package.elm-lang.org/packages/other-author/package/latest/Unknown/)
+[link](/packages/other-author/package/latest/Unknown/)
 -}
 a = 2
 """
@@ -1080,7 +1132,24 @@ a = 2
                             , under = "https://package.elm-lang.org/packages/author/package/1.0.0/Unknown"
                             }
                         ]
-        , test "should report absolute links to unknown modules in links with alt text without a slug" <|
+        , test "should report absolute links to unknown modules in links with alt text with a slug (using absolute-path URLs)" <|
+            \() ->
+                """module A exposing (a, b)
+b = 1
+
+{-| [link](/packages/author/package/1.0.0/Unknown "alt-text")
+-}
+a = 2
+"""
+                    |> Review.Test.runWithProjectData packageProjectWithoutFiles rule
+                    |> Review.Test.expectErrors
+                        [ Review.Test.error
+                            { message = "Link points to non-existing module Unknown"
+                            , details = [ "This is a dead link." ]
+                            , under = "/packages/author/package/1.0.0/Unknown"
+                            }
+                        ]
+        , test "should report absolute or absolute-path links to unknown modules in links with alt text without a slug" <|
             \() ->
                 """module A exposing (a, b)
 b = 1
@@ -1095,6 +1164,23 @@ a = 2
                             { message = "Link points to non-existing module Unknown"
                             , details = [ "This is a dead link." ]
                             , under = "https://package.elm-lang.org/packages/author/package/1.0.0/Unknown#section"
+                            }
+                        ]
+        , test "should report absolute or absolute-path links to unknown modules in links with alt text without a slug (using absolute-path URLs)" <|
+            \() ->
+                """module A exposing (a, b)
+b = 1
+
+{-| [link](/packages/author/package/1.0.0/Unknown#section "alt-text")
+-}
+a = 2
+"""
+                    |> Review.Test.runWithProjectData packageProjectWithoutFiles rule
+                    |> Review.Test.expectErrors
+                        [ Review.Test.error
+                            { message = "Link points to non-existing module Unknown"
+                            , details = [ "This is a dead link." ]
+                            , under = "/packages/author/package/1.0.0/Unknown#section"
                             }
                         ]
         ]
