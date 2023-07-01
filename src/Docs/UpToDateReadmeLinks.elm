@@ -157,16 +157,28 @@ reportError context readmeKey (Node range link) =
                         Link.ModuleSubTarget ver _ ->
                             Just ver
 
-                        _ ->
+                        Link.VersionsSubTarget ->
                             Nothing
             in
-            if context.projectName == name && version /= Nothing && Just context.version /= version then
+            if context.projectName == name && Just context.version /= version then
                 [ Rule.errorForReadmeWithFix readmeKey
                     { message = "Link does not point to the current version of the package"
                     , details = [ "I suggest to run elm-review --fix to get the correct link." ]
                     }
                     range
-                    [ Fix.replaceRangeBy range <| "https://package.elm-lang.org/packages/" ++ name ++ "/" ++ formatSubTargetWithVersion context.version subTarget ++ formatSlug link.slug ]
+                    [ Fix.replaceRangeBy range (formatPackageLink { name = name, version = context.version, subTarget = subTarget, slug = link.slug }) ]
+                ]
+
+            else if link.linkStartsWith == Link.LinkStartsWithSlash then
+                [ Rule.errorForReadmeWithFix readmeKey
+                    { message = "Readme link uses an absolute-path"
+                    , details =
+                        [ "Absolute-path links (starting with \"/\") don't work when looking at the docs from GitHub or the likes."
+                        , "I suggest to run elm-review --fix to change the link to an absolute link (from \"https://\")."
+                        ]
+                    }
+                    range
+                    [ Fix.replaceRangeBy range (formatPackageLink { name = name, version = Maybe.withDefault "" version, subTarget = subTarget, slug = link.slug }) ]
                 ]
 
             else
@@ -174,6 +186,15 @@ reportError context readmeKey (Node range link) =
 
         Link.External _ ->
             []
+
+
+formatPackageLink : { name : String, version : String, subTarget : Link.SubTarget, slug : Maybe String } -> String
+formatPackageLink { name, version, subTarget, slug } =
+    "https://package.elm-lang.org/packages/"
+        ++ name
+        ++ "/"
+        ++ formatSubTargetWithVersion version subTarget
+        ++ formatSlug slug
 
 
 formatSubTargetWithVersion : String -> Link.SubTarget -> String
