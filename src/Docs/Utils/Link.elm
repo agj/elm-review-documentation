@@ -14,6 +14,7 @@ import Elm.Syntax.Node exposing (Node(..))
 import Elm.Syntax.Range exposing (Location, Range)
 import Parser exposing ((|.), (|=), Parser)
 import Regex exposing (Regex)
+import String exposing (startsWith)
 import Url exposing (Url)
 import Url.Parser exposing ((</>))
 
@@ -223,13 +224,21 @@ pathParser endChar =
             |. Parser.symbol "#"
             |= idParser endChar
         , Parser.succeed
-            (\( file, linkStartsWith ) slug ->
-                { file = file
-                , linkStartsWith = linkStartsWith
+            (\startsWithDotSlash { fileTarget, startsWithSlash } slug ->
+                { file = fileTarget
+                , linkStartsWith =
+                    if startsWithDotSlash then
+                        LinkStartsWithDotSlash
+
+                    else if startsWithSlash then
+                        LinkStartsWithSlash
+
+                    else
+                        OtherLinkStart
                 , slug = slug
                 }
             )
-            |. ignoreDotSlash
+            |= ignoreDotSlash
             |= parseModuleName
             |= optionalSectionParser endChar
         ]
@@ -245,7 +254,7 @@ optionalSectionParser endChar =
         ]
 
 
-parseModuleName : Parser ( FileTarget, LinkStartsWith )
+parseModuleName : Parser { fileTarget : FileTarget, startsWithSlash : Bool }
 parseModuleName =
     Parser.succeed ()
         |. Parser.chompWhile (\c -> c /= '#' && c /= ')' && c /= ' ')
@@ -253,12 +262,16 @@ parseModuleName =
         |> Parser.map
             (\linkTarget ->
                 if linkTarget == "" then
-                    ( ReadmeTarget, OtherLinkStart )
+                    { fileTarget = ReadmeTarget
+                    , startsWithSlash = False
+                    }
 
                 else
                     case Parser.run onlyModuleNameParser linkTarget of
                         Ok moduleName ->
-                            ( ModuleTarget moduleName, OtherLinkStart )
+                            { fileTarget = ModuleTarget moduleName
+                            , startsWithSlash = False
+                            }
 
                         Err _ ->
                             case parseExternalPackageUrl linkTarget of
@@ -266,11 +279,13 @@ parseModuleName =
                                     result
 
                                 Nothing ->
-                                    ( External linkTarget, OtherLinkStart )
+                                    { fileTarget = External linkTarget
+                                    , startsWithSlash = False
+                                    }
             )
 
 
-parseExternalPackageUrl : String -> Maybe ( FileTarget, LinkStartsWith )
+parseExternalPackageUrl : String -> Maybe { fileTarget : FileTarget, startsWithSlash : Bool }
 parseExternalPackageUrl urlString =
     let
         authorName =
@@ -318,14 +333,16 @@ parseExternalPackageUrl urlString =
                         )
                 ]
 
-        ( urlMaybe, linkStartsWith ) =
+        ( urlMaybe, startsWithSlash ) =
             case Url.fromString urlString of
                 Just u ->
-                    ( Just u, OtherLinkStart )
+                    ( Just u
+                    , False
+                    )
 
                 Nothing ->
                     ( Url.fromString ("https://package.elm-lang.org" ++ urlString)
-                    , LinkStartsWithSlash
+                    , True
                     )
     in
     urlMaybe
@@ -333,7 +350,12 @@ parseExternalPackageUrl urlString =
             (\url ->
                 if url.host == "package.elm-lang.org" then
                     Url.Parser.parse parser url
-                        |> Maybe.map (\fileTarget -> ( fileTarget, linkStartsWith ))
+                        |> Maybe.map
+                            (\fileTarget ->
+                                { fileTarget = fileTarget
+                                , startsWithSlash = startsWithSlash
+                                }
+                            )
 
                 else
                     Nothing
