@@ -11,25 +11,37 @@ parseExternalPackageUrlTest =
         urlsWithAuthorAndName =
             [ "https://package.elm-lang.org/packages/elm/regex"
             , "https://package.elm-lang.org/packages/elm/regex/"
-            , "/packages/elm/regex"
+            ]
+
+        absolutePathUrlsWithAuthorAndName =
+            [ "/packages/elm/regex"
             , "/packages/elm/regex/"
             ]
 
         urlsWithAuthorNameAndVersion =
             [ "https://package.elm-lang.org/packages/elm/regex/1.1.1"
             , "https://package.elm-lang.org/packages/elm/regex/1.1.1/"
-            , "/packages/elm/regex/1.1.1"
+            ]
+
+        absolutePathUrlsWithAuthorNameAndVersion =
+            [ "/packages/elm/regex/1.1.1"
             , "/packages/elm/regex/1.1.1/"
             ]
 
         urlsWithAuthorNameVersionAndModule =
             [ "https://package.elm-lang.org/packages/elm/regex/1.1.1/Regex"
-            , "/packages/elm/regex/1.1.1/Regex"
+            ]
+
+        absolutePathUrlsWithAuthorNameVersionAndModule =
+            [ "/packages/elm/regex/1.1.1/Regex"
             ]
 
         urlsWithAuthorNameVersionModuleAndSection =
             [ "https://package.elm-lang.org/packages/elm/regex/1.1.1/Regex#replace"
-            , "/packages/elm/regex/1.1.1/Regex#replace"
+            ]
+
+        absolutePathUrlsWithAuthorNameVersionModuleAndSection =
+            [ "/packages/elm/regex/1.1.1/Regex#replace"
             ]
 
         invalidPackageUrls =
@@ -69,6 +81,24 @@ parseExternalPackageUrlTest =
                                         )
                     )
             )
+        , describe "Absolute-path URLs with author and name"
+            (absolutePathUrlsWithAuthorAndName
+                |> List.map
+                    (\url ->
+                        test ("should parse: " ++ url) <|
+                            \_ ->
+                                parseExternalPackageUrl url
+                                    |> Expect.equal
+                                        (Just
+                                            ( PackagesTarget
+                                                { name = "elm/regex"
+                                                , subTarget = VersionsSubTarget
+                                                }
+                                            , LinkStartsWithSlash
+                                            )
+                                        )
+                    )
+            )
         , describe "URLs with author, name and version"
             (urlsWithAuthorNameAndVersion
                 |> List.map
@@ -83,6 +113,24 @@ parseExternalPackageUrlTest =
                                                 , subTarget = ReadmeSubTarget "1.1.1"
                                                 }
                                             , OtherLinkStart
+                                            )
+                                        )
+                    )
+            )
+        , describe "Absolute-path URLs with author, name and version"
+            (absolutePathUrlsWithAuthorNameAndVersion
+                |> List.map
+                    (\url ->
+                        test ("should parse: " ++ url) <|
+                            \_ ->
+                                parseExternalPackageUrl url
+                                    |> Expect.equal
+                                        (Just
+                                            ( PackagesTarget
+                                                { name = "elm/regex"
+                                                , subTarget = ReadmeSubTarget "1.1.1"
+                                                }
+                                            , LinkStartsWithSlash
                                             )
                                         )
                     )
@@ -105,6 +153,24 @@ parseExternalPackageUrlTest =
                                         )
                     )
             )
+        , describe "Absolute-path URLs with author, name, version and section"
+            (absolutePathUrlsWithAuthorNameVersionAndModule
+                |> List.map
+                    (\url ->
+                        test ("should parse: " ++ url) <|
+                            \_ ->
+                                parseExternalPackageUrl url
+                                    |> Expect.equal
+                                        (Just
+                                            ( PackagesTarget
+                                                { name = "elm/regex"
+                                                , subTarget = ModuleSubTarget "1.1.1" [ "Regex" ]
+                                                }
+                                            , LinkStartsWithSlash
+                                            )
+                                        )
+                    )
+            )
         , describe "URLs with author, name, version, module and section"
             (urlsWithAuthorNameVersionModuleAndSection
                 |> List.map
@@ -119,6 +185,24 @@ parseExternalPackageUrlTest =
                                                 , subTarget = ModuleSubTarget "1.1.1" [ "Regex" ]
                                                 }
                                             , OtherLinkStart
+                                            )
+                                        )
+                    )
+            )
+        , describe "Absolute-path URLs with author, name, version, module and section"
+            (absolutePathUrlsWithAuthorNameVersionModuleAndSection
+                |> List.map
+                    (\url ->
+                        test ("should parse: " ++ url) <|
+                            \_ ->
+                                parseExternalPackageUrl url
+                                    |> Expect.equal
+                                        (Just
+                                            ( PackagesTarget
+                                                { name = "elm/regex"
+                                                , subTarget = ModuleSubTarget "1.1.1" [ "Regex" ]
+                                                }
+                                            , LinkStartsWithSlash
                                             )
                                         )
                     )
