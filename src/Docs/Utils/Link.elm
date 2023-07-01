@@ -297,7 +297,7 @@ parseExternalPackageLink urlString =
             authorName
                 </> Url.Parser.string
 
-        authorNameVersionSection =
+        authorNameVersionModule =
             authorNameVersion
                 </> Url.Parser.string
                 </> Url.Parser.fragment identity
@@ -320,7 +320,7 @@ parseExternalPackageLink urlString =
                                 , subTarget = ReadmeSubTarget version
                                 }
                         )
-                , authorNameVersionSection
+                , authorNameVersionModule
                     |> Url.Parser.map
                         (\author name version module_ _ ->
                             PackagesTarget
