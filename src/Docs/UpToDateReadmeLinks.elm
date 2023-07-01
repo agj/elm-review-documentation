@@ -166,7 +166,11 @@ reportError context readmeKey (Node range link) =
                     , details = [ "I suggest to run elm-review --fix to get the correct link." ]
                     }
                     range
-                    [ Fix.replaceRangeBy range (formatPackageLink { name = name, version = context.version, subTarget = subTarget, slug = link.slug }) ]
+                    [ Fix.replaceRangeBy range
+                        (formatPackageLinkForVersion context.version
+                            { name = name, subTarget = subTarget, slug = link.slug }
+                        )
+                    ]
                 ]
 
             else if link.linkStartsWith == Link.LinkStartsWithSlash then
@@ -178,7 +182,11 @@ reportError context readmeKey (Node range link) =
                         ]
                     }
                     range
-                    [ Fix.replaceRangeBy range (formatPackageLink { name = name, version = Maybe.withDefault "" version, subTarget = subTarget, slug = link.slug }) ]
+                    [ Fix.replaceRangeBy range
+                        (formatPackageLinkForVersion (Maybe.withDefault "" version)
+                            { name = name, subTarget = subTarget, slug = link.slug }
+                        )
+                    ]
                 ]
 
             else
@@ -188,17 +196,17 @@ reportError context readmeKey (Node range link) =
             []
 
 
-formatPackageLink : { name : String, version : String, subTarget : Link.SubTarget, slug : Maybe String } -> String
-formatPackageLink { name, version, subTarget, slug } =
+formatPackageLinkForVersion : String -> { name : String, subTarget : Link.SubTarget, slug : Maybe String } -> String
+formatPackageLinkForVersion version { name, subTarget, slug } =
     "https://package.elm-lang.org/packages/"
         ++ name
         ++ "/"
-        ++ formatSubTargetWithVersion version subTarget
+        ++ formatSubTargetForVersion version subTarget
         ++ formatSlug slug
 
 
-formatSubTargetWithVersion : String -> Link.SubTarget -> String
-formatSubTargetWithVersion version subTarget =
+formatSubTargetForVersion : String -> Link.SubTarget -> String
+formatSubTargetForVersion version subTarget =
     case subTarget of
         Link.ModuleSubTarget _ moduleName ->
             version ++ "/" ++ String.join "-" moduleName ++ "/"
