@@ -126,7 +126,7 @@ reportError context readmeKey (Node range link) =
             ]
 
         Link.ReadmeTarget ->
-            if link.startsWithDotSlash then
+            if link.linkStartsWith == Link.LinkStartsWithDotSlash then
                 [ Rule.errorForReadmeWithFix readmeKey
                     { message = "Found relative link from and to README"
                     , details =

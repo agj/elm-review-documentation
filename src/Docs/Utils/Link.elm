@@ -1,6 +1,7 @@
 module Docs.Utils.Link exposing
     ( FileTarget(..)
     , Link
+    , LinkStartsWith(..)
     , SubTarget(..)
     , findLinks
     , parseExternalPackageUrl
@@ -33,7 +34,7 @@ addLineNumber lineNumber { row, column } =
 
 type alias Link =
     { file : FileTarget
-    , startsWithDotSlash : Bool
+    , linkStartsWith : LinkStartsWith
     , slug : Maybe String
     }
 
@@ -49,6 +50,12 @@ type SubTarget
     = VersionsSubTarget
     | ReadmeSubTarget String
     | ModuleSubTarget String ModuleName
+
+
+type LinkStartsWith
+    = LinkStartsWithDotSlash
+    | LinkStartsWithSlash
+    | OtherLinkStart
 
 
 idParser : Char -> Parser String
@@ -211,11 +218,22 @@ pathParser endChar =
     Parser.oneOf
         [ Parser.succeed
             (\section ->
-                { file = ModuleTarget [], startsWithDotSlash = False, slug = Just section }
+                { file = ModuleTarget [], linkStartsWith = OtherLinkStart, slug = Just section }
             )
             |. Parser.symbol "#"
             |= idParser endChar
-        , Parser.succeed (\startsWithDotSlash file slug -> { file = file, startsWithDotSlash = startsWithDotSlash, slug = slug })
+        , Parser.succeed
+            (\startsWithDotSlash file slug ->
+                { file = file
+                , linkStartsWith =
+                    if startsWithDotSlash then
+                        LinkStartsWithDotSlash
+
+                    else
+                        OtherLinkStart
+                , slug = slug
+                }
+            )
             |= ignoreDotSlash
             |= parseModuleName
             |= optionalSectionParser endChar
