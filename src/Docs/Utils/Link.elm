@@ -1,12 +1,13 @@
 module Docs.Utils.Link exposing
-    ( ExternalPackageReference(..)
-    , FileTarget(..)
+    ( FileTarget(..)
     , Link
     , SubTarget(..)
     , findLinks
-    , urlToExternalPackageReference
+    , parseExternalPackageUrl
     )
 
+import Elm.Project exposing (Project(..))
+import Elm.Syntax.File exposing (File)
 import Elm.Syntax.ModuleName exposing (ModuleName)
 import Elm.Syntax.Node exposing (Node(..))
 import Elm.Syntax.Range exposing (Location, Range)
@@ -40,13 +41,14 @@ type alias Link =
 type FileTarget
     = ModuleTarget ModuleName
     | ReadmeTarget
-    | PackagesTarget { name : String, version : String, subTarget : SubTarget }
+    | PackagesTarget { name : String, subTarget : SubTarget }
     | External String
 
 
 type SubTarget
-    = ModuleSubTarget ModuleName
-    | ReadmeSubTarget
+    = VersionsSubTarget
+    | ReadmeSubTarget String
+    | ModuleSubTarget String ModuleName
 
 
 idParser : Char -> Parser String
@@ -246,7 +248,7 @@ parseModuleName =
                             ModuleTarget moduleName
 
                         Err _ ->
-                            case Regex.find linkRegex linkTarget |> List.head |> Maybe.andThen parseSubTarget of
+                            case parseExternalPackageUrl linkTarget of
                                 Just fileTarget ->
                                     fileTarget
 
@@ -255,55 +257,8 @@ parseModuleName =
             )
 
 
-parseSubTarget : Regex.Match -> Maybe FileTarget
-parseSubTarget match =
-    case match.submatches of
-        (Just authorAndPackage) :: (Just linkVersion) :: _ :: rest :: [] ->
-            let
-                subTarget : SubTarget
-                subTarget =
-                    case rest of
-                        Just nonemptyModuleName ->
-                            nonemptyModuleName
-                                |> String.replace "/" ""
-                                |> String.split "-"
-                                |> ModuleSubTarget
-
-                        Nothing ->
-                            ReadmeSubTarget
-            in
-            Just (PackagesTarget { name = authorAndPackage, version = linkVersion, subTarget = subTarget })
-
-        _ ->
-            Nothing
-
-
-linkRegex : Regex
-linkRegex =
-    Regex.fromString "https://package\\.elm-lang\\.org/packages/([\\w-]+/[\\w-]+)/(latest|\\w+\\.\\w+\\.\\w+)(/(.*))?"
-        |> Maybe.withDefault Regex.never
-
-
-type ExternalPackageReference
-    = ExternalPackageVersionSelectionReference
-        { author : String
-        , name : String
-        }
-    | ExternalPackageVersionReference
-        { author : String
-        , name : String
-        , version : String
-        }
-    | ExternalPackageSectionReference
-        { author : String
-        , name : String
-        , version : String
-        , section : String
-        }
-
-
-urlToExternalPackageReference : String -> Maybe ExternalPackageReference
-urlToExternalPackageReference urlString =
+parseExternalPackageUrl : String -> Maybe FileTarget
+parseExternalPackageUrl urlString =
     let
         authorName =
             Url.Parser.s "packages"
@@ -324,37 +279,28 @@ urlToExternalPackageReference urlString =
                 [ authorName
                     |> Url.Parser.map
                         (\author name ->
-                            ExternalPackageVersionSelectionReference
-                                { author = author
-                                , name = name
+                            PackagesTarget
+                                { name = author ++ "/" ++ name
+                                , subTarget = VersionsSubTarget
                                 }
                         )
                 , authorNameVersion
                     |> Url.Parser.map
                         (\author name version ->
-                            ExternalPackageVersionReference
-                                { author = author
-                                , name = name
-                                , version = version
+                            PackagesTarget
+                                { name = author ++ "/" ++ name
+                                , subTarget = ReadmeSubTarget version
                                 }
                         )
                 , authorNameVersionSection
                     |> Url.Parser.map
-                        (\author name version module_ section ->
-                            let
-                                moduleSection =
-                                    case section of
-                                        Just s ->
-                                            module_ ++ "#" ++ s
-
-                                        Nothing ->
-                                            module_
-                            in
-                            ExternalPackageSectionReference
-                                { author = author
-                                , name = name
-                                , version = version
-                                , section = moduleSection
+                        (\author name version module_ _ ->
+                            PackagesTarget
+                                { name = author ++ "/" ++ name
+                                , subTarget =
+                                    module_
+                                        |> String.split "-"
+                                        |> ModuleSubTarget version
                                 }
                         )
                 ]

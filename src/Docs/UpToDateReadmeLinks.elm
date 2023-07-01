@@ -147,14 +147,26 @@ reportError context readmeKey (Node range link) =
             else
                 []
 
-        Link.PackagesTarget { name, version, subTarget } ->
-            if context.projectName == name && context.version /= version then
+        Link.PackagesTarget { name, subTarget } ->
+            let
+                version =
+                    case subTarget of
+                        Link.ReadmeSubTarget ver ->
+                            Just ver
+
+                        Link.ModuleSubTarget ver _ ->
+                            Just ver
+
+                        _ ->
+                            Nothing
+            in
+            if context.projectName == name && version /= Nothing && Just context.version /= version then
                 [ Rule.errorForReadmeWithFix readmeKey
                     { message = "Link does not point to the current version of the package"
                     , details = [ "I suggest to run elm-review --fix to get the correct link." ]
                     }
                     range
-                    [ Fix.replaceRangeBy range <| "https://package.elm-lang.org/packages/" ++ name ++ "/" ++ context.version ++ "/" ++ formatSubTarget subTarget ++ formatSlug link.slug ]
+                    [ Fix.replaceRangeBy range <| "https://package.elm-lang.org/packages/" ++ name ++ "/" ++ formatSubTargetWithVersion context.version subTarget ++ formatSlug link.slug ]
                 ]
 
             else
@@ -164,13 +176,13 @@ reportError context readmeKey (Node range link) =
             []
 
 
-formatSubTarget : Link.SubTarget -> String
-formatSubTarget subTarget =
+formatSubTargetWithVersion : String -> Link.SubTarget -> String
+formatSubTargetWithVersion version subTarget =
     case subTarget of
-        Link.ModuleSubTarget moduleName ->
-            String.join "-" moduleName ++ "/"
+        Link.ModuleSubTarget _ moduleName ->
+            version ++ "/" ++ String.join "-" moduleName ++ "/"
 
-        Link.ReadmeSubTarget ->
+        _ ->
             ""
 
 

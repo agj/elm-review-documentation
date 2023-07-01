@@ -1,12 +1,12 @@
-module Docs.Utils.LinkTest exposing (urlToExternalPackageReferenceTest)
+module Docs.Utils.LinkTest exposing (parseExternalPackageUrlTest)
 
-import Docs.Utils.Link exposing (ExternalPackageReference(..), urlToExternalPackageReference)
+import Docs.Utils.Link exposing (FileTarget(..), SubTarget(..), parseExternalPackageUrl)
 import Expect
 import Test exposing (Test, describe, test)
 
 
-urlToExternalPackageReferenceTest : Test
-urlToExternalPackageReferenceTest =
+parseExternalPackageUrlTest : Test
+parseExternalPackageUrlTest =
     let
         urlsWithAuthorAndName =
             [ "https://package.elm-lang.org/packages/elm/regex"
@@ -42,29 +42,27 @@ urlToExternalPackageReferenceTest =
             , "https://package.elm-lang.org/wrong/elm/regex/1.1.1/Regex"
             , "https://package.elm-lang.org/wrong/elm/regex/1.1.1/Regex#replace"
             , "https://package.elm-lang.org/packages/elm/"
-            , "https://package.elm-lang.org/packages/elm/regex/1.1.1/#replace"
             , "ftp://package.elm-lang.org/packages/elm/regex/1.1.1/Regex#replace"
             , "/wrong/elm/regex"
             , "/wrong/elm/regex/1.1.1/"
             , "/wrong/elm/regex/1.1.1/Regex"
             , "/wrong/elm/regex/1.1.1/Regex#replace"
             , "/packages/elm/"
-            , "/packages/elm/regex/1.1.1/#replace"
             ]
     in
-    describe "urlToExternalPackageReference"
+    describe "parseExternalPackageUrl"
         [ describe "URLs with author and name"
             (urlsWithAuthorAndName
                 |> List.map
                     (\url ->
                         test ("should parse: " ++ url) <|
                             \_ ->
-                                urlToExternalPackageReference url
+                                parseExternalPackageUrl url
                                     |> Expect.equal
                                         (Just
-                                            (ExternalPackageVersionSelectionReference
-                                                { author = "elm"
-                                                , name = "regex"
+                                            (PackagesTarget
+                                                { name = "elm/regex"
+                                                , subTarget = VersionsSubTarget
                                                 }
                                             )
                                         )
@@ -76,13 +74,12 @@ urlToExternalPackageReferenceTest =
                     (\url ->
                         test ("should parse: " ++ url) <|
                             \_ ->
-                                urlToExternalPackageReference url
+                                parseExternalPackageUrl url
                                     |> Expect.equal
                                         (Just
-                                            (ExternalPackageVersionReference
-                                                { author = "elm"
-                                                , name = "regex"
-                                                , version = "1.1.1"
+                                            (PackagesTarget
+                                                { name = "elm/regex"
+                                                , subTarget = ReadmeSubTarget "1.1.1"
                                                 }
                                             )
                                         )
@@ -94,14 +91,12 @@ urlToExternalPackageReferenceTest =
                     (\url ->
                         test ("should parse: " ++ url) <|
                             \_ ->
-                                urlToExternalPackageReference url
+                                parseExternalPackageUrl url
                                     |> Expect.equal
                                         (Just
-                                            (ExternalPackageSectionReference
-                                                { author = "elm"
-                                                , name = "regex"
-                                                , version = "1.1.1"
-                                                , section = "Regex"
+                                            (PackagesTarget
+                                                { name = "elm/regex"
+                                                , subTarget = ModuleSubTarget "1.1.1" [ "Regex" ]
                                                 }
                                             )
                                         )
@@ -113,14 +108,12 @@ urlToExternalPackageReferenceTest =
                     (\url ->
                         test ("should parse: " ++ url) <|
                             \_ ->
-                                urlToExternalPackageReference url
+                                parseExternalPackageUrl url
                                     |> Expect.equal
                                         (Just
-                                            (ExternalPackageSectionReference
-                                                { author = "elm"
-                                                , name = "regex"
-                                                , version = "1.1.1"
-                                                , section = "Regex#replace"
+                                            (PackagesTarget
+                                                { name = "elm/regex"
+                                                , subTarget = ModuleSubTarget "1.1.1" [ "Regex" ]
                                                 }
                                             )
                                         )
@@ -132,7 +125,7 @@ urlToExternalPackageReferenceTest =
                     (\url ->
                         test ("should fail to parse: " ++ url) <|
                             \_ ->
-                                urlToExternalPackageReference url
+                                parseExternalPackageUrl url
                                     |> Expect.equal Nothing
                     )
             )

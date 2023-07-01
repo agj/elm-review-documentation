@@ -626,11 +626,23 @@ errorForFile projectContext sectionsPerModule fileLinksAndSections (MaybeExposed
             reportErrorsForExternalTarget (projectContext.packageNameAndVersion == Nothing) fileLinksAndSections.fileKey maybeExposedLink.linkRange target
 
 
-reportErrorsForPackagesTarget : ProjectContext -> Dict ModuleName (List Section) -> FileLinksAndSections -> MaybeExposedLinkData -> { name : String, version : String, subTarget : Link.SubTarget } -> Maybe (Rule.Error scope)
-reportErrorsForPackagesTarget projectContext sectionsPerModule fileLinksAndSections maybeExposedLink { name, version, subTarget } =
+reportErrorsForPackagesTarget : ProjectContext -> Dict ModuleName (List Section) -> FileLinksAndSections -> MaybeExposedLinkData -> { name : String, subTarget : Link.SubTarget } -> Maybe (Rule.Error scope)
+reportErrorsForPackagesTarget projectContext sectionsPerModule fileLinksAndSections maybeExposedLink { name, subTarget } =
+    let
+        version =
+            case subTarget of
+                Link.ReadmeSubTarget ver ->
+                    Just ver
+
+                Link.ModuleSubTarget ver _ ->
+                    Just ver
+
+                _ ->
+                    Nothing
+    in
     case projectContext.packageNameAndVersion of
         Just currentPackage ->
-            if name == currentPackage.name && (version == "latest" || version == currentPackage.version) then
+            if name == currentPackage.name && (version == Just "latest" || version == Just currentPackage.version) then
                 reportErrorForCurrentPackageSubTarget projectContext sectionsPerModule fileLinksAndSections maybeExposedLink subTarget
 
             else
@@ -643,11 +655,14 @@ reportErrorsForPackagesTarget projectContext sectionsPerModule fileLinksAndSecti
 reportErrorForCurrentPackageSubTarget : ProjectContext -> Dict ModuleName (List Section) -> FileLinksAndSections -> MaybeExposedLinkData -> Link.SubTarget -> Maybe (Rule.Error scope)
 reportErrorForCurrentPackageSubTarget projectContext sectionsPerModule fileLinksAndSections maybeExposedLink subTarget =
     case subTarget of
-        Link.ModuleSubTarget moduleName ->
+        Link.ModuleSubTarget version moduleName ->
             reportErrorForModule projectContext sectionsPerModule fileLinksAndSections maybeExposedLink moduleName
 
-        Link.ReadmeSubTarget ->
+        Link.ReadmeSubTarget version ->
             reportErrorForReadme sectionsPerModule fileLinksAndSections.fileKey maybeExposedLink
+
+        Link.VersionsSubTarget ->
+            Nothing
 
 
 reportErrorForModule : ProjectContext -> Dict ModuleName (List Section) -> FileLinksAndSections -> MaybeExposedLinkData -> ModuleName -> Maybe (Rule.Error scope)
