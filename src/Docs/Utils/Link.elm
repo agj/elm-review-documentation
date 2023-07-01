@@ -14,7 +14,7 @@ import Elm.Syntax.Node exposing (Node(..))
 import Elm.Syntax.Range exposing (Location, Range)
 import Parser exposing ((|.), (|=), Parser)
 import Regex exposing (Regex)
-import String exposing (startsWith)
+import String
 import Url exposing (Url)
 import Url.Parser exposing ((</>))
 
