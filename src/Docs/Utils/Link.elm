@@ -14,7 +14,7 @@ import Elm.Syntax.Node exposing (Node(..))
 import Elm.Syntax.Range exposing (Location, Range)
 import Parser exposing ((|.), (|=), Parser)
 import Regex exposing (Regex)
-import Url
+import Url exposing (Url)
 import Url.Parser exposing ((</>))
 
 
@@ -223,18 +223,13 @@ pathParser endChar =
             |. Parser.symbol "#"
             |= idParser endChar
         , Parser.succeed
-            (\startsWithDotSlash file slug ->
+            (\( file, linkStartsWith ) slug ->
                 { file = file
-                , linkStartsWith =
-                    if startsWithDotSlash then
-                        LinkStartsWithDotSlash
-
-                    else
-                        OtherLinkStart
+                , linkStartsWith = linkStartsWith
                 , slug = slug
                 }
             )
-            |= ignoreDotSlash
+            |. ignoreDotSlash
             |= parseModuleName
             |= optionalSectionParser endChar
         ]
@@ -250,7 +245,7 @@ optionalSectionParser endChar =
         ]
 
 
-parseModuleName : Parser FileTarget
+parseModuleName : Parser ( FileTarget, LinkStartsWith )
 parseModuleName =
     Parser.succeed ()
         |. Parser.chompWhile (\c -> c /= '#' && c /= ')' && c /= ' ')
@@ -258,24 +253,24 @@ parseModuleName =
         |> Parser.map
             (\linkTarget ->
                 if linkTarget == "" then
-                    ReadmeTarget
+                    ( ReadmeTarget, OtherLinkStart )
 
                 else
                     case Parser.run onlyModuleNameParser linkTarget of
                         Ok moduleName ->
-                            ModuleTarget moduleName
+                            ( ModuleTarget moduleName, OtherLinkStart )
 
                         Err _ ->
                             case parseExternalPackageUrl linkTarget of
-                                Just fileTarget ->
-                                    fileTarget
+                                Just result ->
+                                    result
 
                                 Nothing ->
-                                    External linkTarget
+                                    ( External linkTarget, OtherLinkStart )
             )
 
 
-parseExternalPackageUrl : String -> Maybe FileTarget
+parseExternalPackageUrl : String -> Maybe ( FileTarget, LinkStartsWith )
 parseExternalPackageUrl urlString =
     let
         authorName =
@@ -323,19 +318,22 @@ parseExternalPackageUrl urlString =
                         )
                 ]
 
-        urlMaybe =
+        ( urlMaybe, linkStartsWith ) =
             case Url.fromString urlString of
                 Just u ->
-                    Just u
+                    ( Just u, OtherLinkStart )
 
                 Nothing ->
-                    Url.fromString ("https://package.elm-lang.org" ++ urlString)
+                    ( Url.fromString ("https://package.elm-lang.org" ++ urlString)
+                    , LinkStartsWithSlash
+                    )
     in
     urlMaybe
         |> Maybe.andThen
             (\url ->
                 if url.host == "package.elm-lang.org" then
                     Url.Parser.parse parser url
+                        |> Maybe.map (\fileTarget -> ( fileTarget, linkStartsWith ))
 
                 else
                     Nothing

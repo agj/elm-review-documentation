@@ -1,6 +1,6 @@
 module Docs.Utils.LinkTest exposing (parseExternalPackageUrlTest)
 
-import Docs.Utils.Link exposing (FileTarget(..), SubTarget(..), parseExternalPackageUrl)
+import Docs.Utils.Link exposing (FileTarget(..), LinkStartsWith(..), SubTarget(..), parseExternalPackageUrl)
 import Expect
 import Test exposing (Test, describe, test)
 
@@ -60,10 +60,11 @@ parseExternalPackageUrlTest =
                                 parseExternalPackageUrl url
                                     |> Expect.equal
                                         (Just
-                                            (PackagesTarget
+                                            ( PackagesTarget
                                                 { name = "elm/regex"
                                                 , subTarget = VersionsSubTarget
                                                 }
+                                            , OtherLinkStart
                                             )
                                         )
                     )
@@ -77,10 +78,11 @@ parseExternalPackageUrlTest =
                                 parseExternalPackageUrl url
                                     |> Expect.equal
                                         (Just
-                                            (PackagesTarget
+                                            ( PackagesTarget
                                                 { name = "elm/regex"
                                                 , subTarget = ReadmeSubTarget "1.1.1"
                                                 }
+                                            , OtherLinkStart
                                             )
                                         )
                     )
@@ -94,10 +96,11 @@ parseExternalPackageUrlTest =
                                 parseExternalPackageUrl url
                                     |> Expect.equal
                                         (Just
-                                            (PackagesTarget
+                                            ( PackagesTarget
                                                 { name = "elm/regex"
                                                 , subTarget = ModuleSubTarget "1.1.1" [ "Regex" ]
                                                 }
+                                            , OtherLinkStart
                                             )
                                         )
                     )
@@ -111,10 +114,11 @@ parseExternalPackageUrlTest =
                                 parseExternalPackageUrl url
                                     |> Expect.equal
                                         (Just
-                                            (PackagesTarget
+                                            ( PackagesTarget
                                                 { name = "elm/regex"
                                                 , subTarget = ModuleSubTarget "1.1.1" [ "Regex" ]
                                                 }
+                                            , OtherLinkStart
                                             )
                                         )
                     )
