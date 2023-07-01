@@ -120,8 +120,8 @@ all =
                         [ Review.Test.error
                             { message = "Readme link uses an absolute-path"
                             , details =
-                                [ "Absolute-path links (starting with '/') don't work when looking at the docs from GitHub or the likes."
-                                , "I suggest to run elm-review --fix to change the link to an absolute link (from 'https://')."
+                                [ "Absolute-path links (starting with \"/\") don't work when looking at the docs from GitHub or the likes."
+                                , "I suggest to run elm-review --fix to change the link to an absolute link (from \"https://\")."
                                 ]
                             , under = "/packages/author/package/1.2.3/Module-Name"
                             }
@@ -249,7 +249,7 @@ all =
                         [ Review.Test.error
                             { message = "Found an absolute-path link from and to README"
                             , details =
-                                [ "Absolute-path links (starting with '/') don't work when looking at the docs from GitHub or the likes."
+                                [ "Absolute-path links (starting with \"/\") don't work when looking at the docs from GitHub or the likes."
                                 , "I suggest to run elm-review --fix to change the link to a relative link."
                                 ]
                             , under = "/packages/au-tho5r/pack-age1/1.2.3/#section"
