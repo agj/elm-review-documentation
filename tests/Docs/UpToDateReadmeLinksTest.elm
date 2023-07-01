@@ -110,6 +110,23 @@ all =
                             }
                             |> Review.Test.whenFixed (readmeWithLink "https://package.elm-lang.org/packages/author/package/1.2.3/Module-Name/")
                         ]
+        , test "should report an error if a link points to the current project using an absolute-path URL" <|
+            \() ->
+                Project.new
+                    |> Project.addElmJson (createElmJson <| packageElmJson "author/package")
+                    |> addReadme "/packages/author/package/1.2.3/Module-Name"
+                    |> testRule
+                    |> Review.Test.expectErrorsForReadme
+                        [ Review.Test.error
+                            { message = "Readme link uses an absolute-path"
+                            , details =
+                                [ "Absolute-path links (starting with '/') don't work when looking at the docs from GitHub or the likes."
+                                , "I suggest to run elm-review --fix to change the link to an absolute link (from 'https://')."
+                                ]
+                            , under = "/packages/author/package/1.2.3/Module-Name"
+                            }
+                            |> Review.Test.whenFixed (readmeWithLink "https://package.elm-lang.org/packages/author/package/1.2.3/Module-Name/")
+                        ]
         , test "should report errors for multiple links on the same line" <|
             \() ->
                 Project.new
