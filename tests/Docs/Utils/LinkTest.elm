@@ -1,12 +1,12 @@
-module Docs.Utils.LinkTest exposing (parseExternalPackageUrlTest)
+module Docs.Utils.LinkTest exposing (parseExternalPackageLinkTest)
 
-import Docs.Utils.Link exposing (FileTarget(..), SubTarget(..), parseExternalPackageUrl)
+import Docs.Utils.Link exposing (FileTarget(..), SubTarget(..), parseExternalPackageLink)
 import Expect
 import Test exposing (Test, describe, test)
 
 
-parseExternalPackageUrlTest : Test
-parseExternalPackageUrlTest =
+parseExternalPackageLinkTest : Test
+parseExternalPackageLinkTest =
     let
         urlsWithAuthorAndName =
             [ "https://package.elm-lang.org/packages/elm/regex"
@@ -62,14 +62,14 @@ parseExternalPackageUrlTest =
             , "/packages/elm/"
             ]
     in
-    describe "parseExternalPackageUrl"
+    describe "parseExternalPackageLink"
         [ describe "URLs with author and name"
             (urlsWithAuthorAndName
                 |> List.map
                     (\url ->
                         test ("should parse: " ++ url) <|
                             \_ ->
-                                parseExternalPackageUrl url
+                                parseExternalPackageLink url
                                     |> Expect.equal
                                         (Just
                                             { fileTarget =
@@ -88,7 +88,7 @@ parseExternalPackageUrlTest =
                     (\url ->
                         test ("should parse: " ++ url) <|
                             \_ ->
-                                parseExternalPackageUrl url
+                                parseExternalPackageLink url
                                     |> Expect.equal
                                         (Just
                                             { fileTarget =
@@ -107,7 +107,7 @@ parseExternalPackageUrlTest =
                     (\url ->
                         test ("should parse: " ++ url) <|
                             \_ ->
-                                parseExternalPackageUrl url
+                                parseExternalPackageLink url
                                     |> Expect.equal
                                         (Just
                                             { fileTarget =
@@ -126,7 +126,7 @@ parseExternalPackageUrlTest =
                     (\url ->
                         test ("should parse: " ++ url) <|
                             \_ ->
-                                parseExternalPackageUrl url
+                                parseExternalPackageLink url
                                     |> Expect.equal
                                         (Just
                                             { fileTarget =
@@ -145,7 +145,7 @@ parseExternalPackageUrlTest =
                     (\url ->
                         test ("should parse: " ++ url) <|
                             \_ ->
-                                parseExternalPackageUrl url
+                                parseExternalPackageLink url
                                     |> Expect.equal
                                         (Just
                                             { fileTarget =
@@ -164,7 +164,7 @@ parseExternalPackageUrlTest =
                     (\url ->
                         test ("should parse: " ++ url) <|
                             \_ ->
-                                parseExternalPackageUrl url
+                                parseExternalPackageLink url
                                     |> Expect.equal
                                         (Just
                                             { fileTarget =
@@ -183,7 +183,7 @@ parseExternalPackageUrlTest =
                     (\url ->
                         test ("should parse: " ++ url) <|
                             \_ ->
-                                parseExternalPackageUrl url
+                                parseExternalPackageLink url
                                     |> Expect.equal
                                         (Just
                                             { fileTarget =
@@ -202,7 +202,7 @@ parseExternalPackageUrlTest =
                     (\url ->
                         test ("should parse: " ++ url) <|
                             \_ ->
-                                parseExternalPackageUrl url
+                                parseExternalPackageLink url
                                     |> Expect.equal
                                         (Just
                                             { fileTarget =
@@ -221,7 +221,7 @@ parseExternalPackageUrlTest =
                     (\url ->
                         test ("should fail to parse: " ++ url) <|
                             \_ ->
-                                parseExternalPackageUrl url
+                                parseExternalPackageLink url
                                     |> Expect.equal Nothing
                     )
             )

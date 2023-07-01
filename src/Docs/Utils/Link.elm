@@ -4,7 +4,7 @@ module Docs.Utils.Link exposing
     , StartsWith(..)
     , SubTarget(..)
     , findLinks
-    , parseExternalPackageUrl
+    , parseExternalPackageLink
     )
 
 import Elm.Project exposing (Project(..))
@@ -274,7 +274,7 @@ parseModuleName =
                             }
 
                         Err _ ->
-                            case parseExternalPackageUrl linkTarget of
+                            case parseExternalPackageLink linkTarget of
                                 Just result ->
                                     result
 
@@ -285,8 +285,8 @@ parseModuleName =
             )
 
 
-parseExternalPackageUrl : String -> Maybe { fileTarget : FileTarget, startsWithSlash : Bool }
-parseExternalPackageUrl urlString =
+parseExternalPackageLink : String -> Maybe { fileTarget : FileTarget, startsWithSlash : Bool }
+parseExternalPackageLink urlString =
     let
         authorName =
             Url.Parser.s "packages"
