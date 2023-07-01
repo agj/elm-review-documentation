@@ -239,6 +239,23 @@ all =
                             }
                             |> Review.Test.whenFixed (readmeWithLink "#section")
                         ]
+        , test "should report an error if the link points to the README using an absolute-path" <|
+            \() ->
+                Project.new
+                    |> Project.addElmJson (createElmJson <| packageElmJson "au-tho5r/pack-age1")
+                    |> addReadme "/packages/au-tho5r/pack-age1/1.2.3/#section"
+                    |> testRule
+                    |> Review.Test.expectErrorsForReadme
+                        [ Review.Test.error
+                            { message = "Found an absolute-path link from and to README"
+                            , details =
+                                [ "Absolute-path links (starting with '/') don't work when looking at the docs from GitHub or the likes."
+                                , "I suggest to run elm-review --fix to change the link to a relative link."
+                                ]
+                            , under = "/packages/au-tho5r/pack-age1/1.2.3/#section"
+                            }
+                            |> Review.Test.whenFixed (readmeWithLink "#section")
+                        ]
         , test "should report an error but not provide a fix if the link is exactly ./" <|
             \() ->
                 Project.new
