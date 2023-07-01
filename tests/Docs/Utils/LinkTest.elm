@@ -8,39 +8,39 @@ import Test exposing (Test, describe, test)
 parseExternalPackageLinkTest : Test
 parseExternalPackageLinkTest =
     let
-        urlsWithAuthorAndName =
+        urlsWithAuthorName =
             [ "https://package.elm-lang.org/packages/elm/regex"
             , "https://package.elm-lang.org/packages/elm/regex/"
             ]
 
-        absolutePathUrlsWithAuthorAndName =
+        absolutePathUrlsWithAuthorName =
             [ "/packages/elm/regex"
             , "/packages/elm/regex/"
             ]
 
-        urlsWithAuthorNameAndVersion =
+        urlsWithAuthorNameVersion =
             [ "https://package.elm-lang.org/packages/elm/regex/1.1.1"
             , "https://package.elm-lang.org/packages/elm/regex/1.1.1/"
             ]
 
-        absolutePathUrlsWithAuthorNameAndVersion =
+        absolutePathUrlsWithAuthorNameVersion =
             [ "/packages/elm/regex/1.1.1"
             , "/packages/elm/regex/1.1.1/"
             ]
 
-        urlsWithAuthorNameVersionAndModule =
+        urlsWithAuthorNameVersionModule =
             [ "https://package.elm-lang.org/packages/elm/regex/1.1.1/Regex"
             ]
 
-        absolutePathUrlsWithAuthorNameVersionAndModule =
+        absolutePathUrlsWithAuthorNameVersionModule =
             [ "/packages/elm/regex/1.1.1/Regex"
             ]
 
-        urlsWithAuthorNameVersionModuleAndSection =
+        urlsWithAuthorNameVersionModuleSection =
             [ "https://package.elm-lang.org/packages/elm/regex/1.1.1/Regex#replace"
             ]
 
-        absolutePathUrlsWithAuthorNameVersionModuleAndSection =
+        absolutePathUrlsWithAuthorNameVersionModuleSection =
             [ "/packages/elm/regex/1.1.1/Regex#replace"
             ]
 
@@ -64,7 +64,7 @@ parseExternalPackageLinkTest =
     in
     describe "parseExternalPackageLink"
         [ describe "URLs with author and name"
-            (urlsWithAuthorAndName
+            (urlsWithAuthorName
                 |> List.map
                     (\url ->
                         test ("should parse: " ++ url) <|
@@ -83,7 +83,7 @@ parseExternalPackageLinkTest =
                     )
             )
         , describe "Absolute-path URLs with author and name"
-            (absolutePathUrlsWithAuthorAndName
+            (absolutePathUrlsWithAuthorName
                 |> List.map
                     (\url ->
                         test ("should parse: " ++ url) <|
@@ -102,7 +102,7 @@ parseExternalPackageLinkTest =
                     )
             )
         , describe "URLs with author, name and version"
-            (urlsWithAuthorNameAndVersion
+            (urlsWithAuthorNameVersion
                 |> List.map
                     (\url ->
                         test ("should parse: " ++ url) <|
@@ -121,7 +121,7 @@ parseExternalPackageLinkTest =
                     )
             )
         , describe "Absolute-path URLs with author, name and version"
-            (absolutePathUrlsWithAuthorNameAndVersion
+            (absolutePathUrlsWithAuthorNameVersion
                 |> List.map
                     (\url ->
                         test ("should parse: " ++ url) <|
@@ -140,7 +140,7 @@ parseExternalPackageLinkTest =
                     )
             )
         , describe "URLs with author, name, version and module"
-            (urlsWithAuthorNameVersionAndModule
+            (urlsWithAuthorNameVersionModule
                 |> List.map
                     (\url ->
                         test ("should parse: " ++ url) <|
@@ -159,7 +159,7 @@ parseExternalPackageLinkTest =
                     )
             )
         , describe "Absolute-path URLs with author, name, version and module"
-            (absolutePathUrlsWithAuthorNameVersionAndModule
+            (absolutePathUrlsWithAuthorNameVersionModule
                 |> List.map
                     (\url ->
                         test ("should parse: " ++ url) <|
@@ -178,7 +178,7 @@ parseExternalPackageLinkTest =
                     )
             )
         , describe "URLs with author, name, version, module and section"
-            (urlsWithAuthorNameVersionModuleAndSection
+            (urlsWithAuthorNameVersionModuleSection
                 |> List.map
                     (\url ->
                         test ("should parse: " ++ url) <|
@@ -197,7 +197,7 @@ parseExternalPackageLinkTest =
                     )
             )
         , describe "Absolute-path URLs with author, name, version, module and section"
-            (absolutePathUrlsWithAuthorNameVersionModuleAndSection
+            (absolutePathUrlsWithAuthorNameVersionModuleSection
                 |> List.map
                     (\url ->
                         test ("should parse: " ++ url) <|
