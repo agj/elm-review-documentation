@@ -182,6 +182,9 @@ formatSubTargetWithVersion version subTarget =
         Link.ModuleSubTarget _ moduleName ->
             version ++ "/" ++ String.join "-" moduleName ++ "/"
 
+        Link.ReadmeSubTarget _ ->
+            version ++ "/"
+
         _ ->
             ""
 
