@@ -126,7 +126,7 @@ reportError context readmeKey (Node range link) =
             ]
 
         Link.ReadmeTarget ->
-            if link.linkStartsWith == Link.LinkStartsWithDotSlash then
+            if link.startsWith == Link.StartsWithDotSlash then
                 [ Rule.errorForReadmeWithFix readmeKey
                     { message = "Found relative link from and to README"
                     , details =
@@ -173,7 +173,7 @@ reportError context readmeKey (Node range link) =
                     ]
                 ]
 
-            else if link.linkStartsWith == Link.LinkStartsWithSlash then
+            else if link.startsWith == Link.StartsWithSlash then
                 [ Rule.errorForReadmeWithFix readmeKey
                     { message = "Readme link uses an absolute-path"
                     , details =
