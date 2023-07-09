@@ -50,13 +50,13 @@ packageElmJson name =
 }"""
 
 
-message : String
-message =
+messageVersion : String
+messageVersion =
     "Link does not point to the current version of the package"
 
 
-details : List String
-details =
+detailsVersion : List String
+detailsVersion =
     [ "I suggest to run elm-review --fix to get the correct link." ]
 
 
@@ -116,8 +116,8 @@ all =
                     |> testRule
                     |> Review.Test.expectErrorsForReadme
                         [ Review.Test.error
-                            { message = message
-                            , details = details
+                            { message = messageVersion
+                            , details = detailsVersion
                             , under = "https://package.elm-lang.org/packages/author/package/1.2.4/Module-Name"
                             }
                             |> Review.Test.whenFixed (readmeWithLink "https://package.elm-lang.org/packages/author/package/1.2.3/Module-Name/")
@@ -202,16 +202,16 @@ all =
                     |> testRule
                     |> Review.Test.expectErrorsForReadme
                         [ Review.Test.error
-                            { message = message
-                            , details = details
+                            { message = messageVersion
+                            , details = detailsVersion
                             , under = "https://package.elm-lang.org/packages/author/package/1.2.4/A"
                             }
                             |> Review.Test.whenFixed """
 [link1](https://package.elm-lang.org/packages/author/package/1.2.3/A/) [link2](https://package.elm-lang.org/packages/author/package/1.2.4/B)
 """
                         , Review.Test.error
-                            { message = message
-                            , details = details
+                            { message = messageVersion
+                            , details = detailsVersion
                             , under = "https://package.elm-lang.org/packages/author/package/1.2.4/B"
                             }
                             |> Review.Test.whenFixed """
@@ -226,8 +226,8 @@ all =
                     |> testRule
                     |> Review.Test.expectErrorsForReadme
                         [ Review.Test.error
-                            { message = message
-                            , details = details
+                            { message = messageVersion
+                            , details = detailsVersion
                             , under = "https://package.elm-lang.org/packages/author/package/latest/Module-Name"
                             }
                             |> Review.Test.whenFixed (readmeWithLink "https://package.elm-lang.org/packages/author/package/1.2.3/Module-Name/")
@@ -240,8 +240,8 @@ all =
                     |> testRule
                     |> Review.Test.expectErrorsForReadme
                         [ Review.Test.error
-                            { message = message
-                            , details = details
+                            { message = messageVersion
+                            , details = detailsVersion
                             , under = "https://package.elm-lang.org/packages/au-tho5r/pack-age1/latest/Module-Name"
                             }
                             |> Review.Test.whenFixed (readmeWithLink "https://package.elm-lang.org/packages/au-tho5r/pack-age1/1.2.3/Module-Name/")
@@ -330,8 +330,8 @@ all =
                     |> testRule
                     |> Review.Test.expectErrorsForReadme
                         [ Review.Test.error
-                            { message = "Link does not point to the current version of the package"
-                            , details = details
+                            { message = messageVersion
+                            , details = detailsVersion
                             , under = "https://package.elm-lang.org/packages/au-tho5r/pack-age1/latest/"
                             }
                             |> Review.Test.whenFixed """
