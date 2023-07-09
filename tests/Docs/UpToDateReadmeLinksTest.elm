@@ -60,18 +60,6 @@ detailsVersion =
     [ "I suggest to run elm-review --fix to get the correct link." ]
 
 
-messageAbsolutePath : String
-messageAbsolutePath =
-    "README link uses an absolute-path"
-
-
-detailsAbsolutePath : List String
-detailsAbsolutePath =
-    [ "Links starting with \"/\" don't work when looking at the docs from GitHub or the likes."
-    , "I suggest to run elm-review --fix to change the link to an absolute link (\"https://...\")."
-    ]
-
-
 readmeWithLink : String -> String
 readmeWithLink link =
     """
@@ -122,21 +110,14 @@ all =
                             }
                             |> Review.Test.whenFixed (readmeWithLink "https://package.elm-lang.org/packages/author/package/1.2.3/Module-Name/")
                         ]
-        , test "should report an absolute-path error if such a link points to current version of own package" <|
+        , test "should not report an error if there are absolute-path links pointing to current version of own package" <|
             \() ->
                 Project.new
                     |> Project.addElmJson (createElmJson <| packageElmJson "author/package")
                     |> addReadme "/packages/author/package/1.2.3/Module-Name"
                     |> testRule
-                    |> Review.Test.expectErrorsForReadme
-                        [ Review.Test.error
-                            { message = messageAbsolutePath
-                            , details = detailsAbsolutePath
-                            , under = "/packages/author/package/1.2.3/Module-Name"
-                            }
-                            |> Review.Test.whenFixed (readmeWithLink "https://package.elm-lang.org/packages/author/package/1.2.3/Module-Name/")
-                        ]
-        , test "should report an absolute-path error if such a link points to a different version of own package" <|
+                    |> Review.Test.expectNoErrors
+        , test "should report an error if an absolute-path link points to a different version of own package" <|
             \() ->
                 Project.new
                     |> Project.addElmJson (createElmJson <| packageElmJson "author/package")
@@ -144,54 +125,33 @@ all =
                     |> testRule
                     |> Review.Test.expectErrorsForReadme
                         [ Review.Test.error
-                            { message = messageAbsolutePath
-                            , details = detailsAbsolutePath
+                            { message = messageVersion
+                            , details = detailsVersion
                             , under = "/packages/author/package/1.2.4/Module-Name"
                             }
                             |> Review.Test.whenFixed (readmeWithLink "https://package.elm-lang.org/packages/author/package/1.2.4/Module-Name/")
                         ]
-        , test "should report an error if a link points to any package's module using an absolute-path URL" <|
+        , test "should not report an error if a link points to any package's module using an absolute-path URL" <|
             \() ->
                 Project.new
                     |> Project.addElmJson (createElmJson <| packageElmJson "author/package")
                     |> addReadme "/packages/another-author/another-package/2.3.4/Module-Name"
                     |> testRule
-                    |> Review.Test.expectErrorsForReadme
-                        [ Review.Test.error
-                            { message = messageAbsolutePath
-                            , details = detailsAbsolutePath
-                            , under = "/packages/another-author/another-package/2.3.4/Module-Name"
-                            }
-                            |> Review.Test.whenFixed (readmeWithLink "https://package.elm-lang.org/packages/another-author/another-package/2.3.4/Module-Name/")
-                        ]
-        , test "should report an error if a link points to any package's README using an absolute-path URL" <|
+                    |> Review.Test.expectNoErrors
+        , test "should not report an error if a link points to any package's README using an absolute-path URL" <|
             \() ->
                 Project.new
                     |> Project.addElmJson (createElmJson <| packageElmJson "author/package")
                     |> addReadme "/packages/another-author/another-package/2.3.4"
                     |> testRule
-                    |> Review.Test.expectErrorsForReadme
-                        [ Review.Test.error
-                            { message = messageAbsolutePath
-                            , details = detailsAbsolutePath
-                            , under = "/packages/another-author/another-package/2.3.4"
-                            }
-                            |> Review.Test.whenFixed (readmeWithLink "https://package.elm-lang.org/packages/another-author/another-package/2.3.4/")
-                        ]
-        , test "should report an error if a link points to any package's versions page using an absolute-path URL" <|
+                    |> Review.Test.expectNoErrors
+        , test "should not report an error if a link points to any package's versions page using an absolute-path URL" <|
             \() ->
                 Project.new
                     |> Project.addElmJson (createElmJson <| packageElmJson "author/package")
                     |> addReadme "/packages/another-author/another-package/"
                     |> testRule
-                    |> Review.Test.expectErrorsForReadme
-                        [ Review.Test.error
-                            { message = messageAbsolutePath
-                            , details = detailsAbsolutePath
-                            , under = "/packages/another-author/another-package/"
-                            }
-                            |> Review.Test.whenFixed (readmeWithLink "https://package.elm-lang.org/packages/another-author/another-package/")
-                        ]
+                    |> Review.Test.expectNoErrors
         , test "should report errors for multiple links on the same line" <|
             \() ->
                 Project.new
