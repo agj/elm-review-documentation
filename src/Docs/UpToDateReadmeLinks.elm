@@ -160,20 +160,7 @@ reportError context readmeKey (Node range link) =
                         Link.VersionsSubTarget ->
                             Nothing
             in
-            if context.projectName == name && Just context.version /= version then
-                [ Rule.errorForReadmeWithFix readmeKey
-                    { message = "Link does not point to the current version of the package"
-                    , details = [ "I suggest to run elm-review --fix to get the correct link." ]
-                    }
-                    range
-                    [ Fix.replaceRangeBy range
-                        (formatPackageLinkForVersion context.version
-                            { name = name, subTarget = subTarget, slug = link.slug }
-                        )
-                    ]
-                ]
-
-            else if link.startsWith == Link.StartsWithSlash then
+            if link.startsWith == Link.StartsWithSlash then
                 [ Rule.errorForReadmeWithFix readmeKey
                     { message = "README link uses an absolute-path"
                     , details =
@@ -184,6 +171,19 @@ reportError context readmeKey (Node range link) =
                     range
                     [ Fix.replaceRangeBy range
                         (formatPackageLinkForVersion (Maybe.withDefault "" version)
+                            { name = name, subTarget = subTarget, slug = link.slug }
+                        )
+                    ]
+                ]
+
+            else if context.projectName == name && Just context.version /= version then
+                [ Rule.errorForReadmeWithFix readmeKey
+                    { message = "Link does not point to the current version of the package"
+                    , details = [ "I suggest to run elm-review --fix to get the correct link." ]
+                    }
+                    range
+                    [ Fix.replaceRangeBy range
+                        (formatPackageLinkForVersion context.version
                             { name = name, subTarget = subTarget, slug = link.slug }
                         )
                     ]
