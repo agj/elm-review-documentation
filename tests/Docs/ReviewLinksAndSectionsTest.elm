@@ -975,7 +975,7 @@ a = 2
 """
                     |> Review.Test.runWithProjectData packageProjectWithoutFiles rule
                     |> Review.Test.expectNoErrors
-        , test "should not report links to packages using absolute-path URLs" <|
+        , test "should not report links to packages using absolute paths" <|
             \() ->
                 """module A exposing (..)
 {-|
@@ -985,7 +985,7 @@ a = 2
 """
                     |> Review.Test.runWithProjectData packageProjectWithoutFiles rule
                     |> Review.Test.expectNoErrors
-        , test "should report links to packages using absolute-path URLs when the project is not a package" <|
+        , test "should report links to packages using absolute paths when the project is not a package" <|
             \() ->
                 """module A exposing (..)
 {-|
@@ -996,7 +996,7 @@ a = 2
                     |> Review.Test.run rule
                     |> Review.Test.expectErrors
                         [ Review.Test.error
-                            { message = "Link to package using absolute-path"
+                            { message = "Link to package using absolute path"
                             , details =
                                 [ "Links to packages starting with \"/\" work great for docs viewed from the package site, but not for app docs."
                                 , "I suggest to run elm-review --fix to change the link to an absolute link (\"https://...\")."
