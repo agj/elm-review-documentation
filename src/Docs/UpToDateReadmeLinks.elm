@@ -175,10 +175,10 @@ reportError context readmeKey (Node range link) =
 
             else if link.startsWith == Link.StartsWithSlash then
                 [ Rule.errorForReadmeWithFix readmeKey
-                    { message = "Readme link uses an absolute-path"
+                    { message = "README link uses an absolute-path"
                     , details =
-                        [ "Absolute-path links (starting with \"/\") don't work when looking at the docs from GitHub or the likes."
-                        , "I suggest to run elm-review --fix to change the link to an absolute link (from \"https://\")."
+                        [ "Links starting with \"/\" don't work when looking at the docs from GitHub or the likes."
+                        , "I suggest to run elm-review --fix to change the link to an absolute link (\"https://...\")."
                         ]
                     }
                     range
