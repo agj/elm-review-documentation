@@ -149,16 +149,8 @@ reportError context readmeKey (Node range link) =
 
         Link.PackagesTarget { name, subTarget } ->
             let
-                version =
-                    case subTarget of
-                        Link.ReadmeSubTarget ver ->
-                            Just ver
-
-                        Link.ModuleSubTarget ver _ ->
-                            Just ver
-
-                        Link.VersionsSubTarget ->
-                            Nothing
+                linkVersion =
+                    Link.subTargetVersion subTarget
             in
             if link.startsWith == Link.StartsWithSlash then
                 [ Rule.errorForReadmeWithFix readmeKey
@@ -170,20 +162,20 @@ reportError context readmeKey (Node range link) =
                     }
                     range
                     [ Fix.replaceRangeBy range
-                        (formatPackageLinkForVersion (Maybe.withDefault "" version)
+                        (formatPackageLinkForVersion linkVersion
                             { name = name, subTarget = subTarget, slug = link.slug }
                         )
                     ]
                 ]
 
-            else if context.projectName == name && Just context.version /= version then
+            else if context.projectName == name && Just context.version /= linkVersion then
                 [ Rule.errorForReadmeWithFix readmeKey
                     { message = "Link does not point to the current version of the package"
                     , details = [ "I suggest to run elm-review --fix to get the correct link." ]
                     }
                     range
                     [ Fix.replaceRangeBy range
-                        (formatPackageLinkForVersion context.version
+                        (formatPackageLinkForVersion (Just context.version)
                             { name = name, subTarget = subTarget, slug = link.slug }
                         )
                     ]
@@ -196,25 +188,30 @@ reportError context readmeKey (Node range link) =
             []
 
 
-formatPackageLinkForVersion : String -> { name : String, subTarget : Link.SubTarget, slug : Maybe String } -> String
-formatPackageLinkForVersion version { name, subTarget, slug } =
+formatPackageLinkForVersion : Maybe String -> { name : String, subTarget : Link.SubTarget, slug : Maybe String } -> String
+formatPackageLinkForVersion versionMaybe { name, subTarget, slug } =
     "https://package.elm-lang.org/packages/"
         ++ name
         ++ "/"
-        ++ formatSubTargetForVersion version subTarget
+        ++ formatSubTargetForVersion versionMaybe subTarget
         ++ formatSlug slug
 
 
-formatSubTargetForVersion : String -> Link.SubTarget -> String
-formatSubTargetForVersion version subTarget =
-    case subTarget of
-        Link.ModuleSubTarget _ moduleName ->
-            version ++ "/" ++ String.join "-" moduleName ++ "/"
+formatSubTargetForVersion : Maybe String -> Link.SubTarget -> String
+formatSubTargetForVersion versionMaybe subTarget =
+    case versionMaybe of
+        Just version ->
+            case subTarget of
+                Link.ModuleSubTarget _ moduleName ->
+                    version ++ "/" ++ String.join "-" moduleName ++ "/"
 
-        Link.ReadmeSubTarget _ ->
-            version ++ "/"
+                Link.ReadmeSubTarget _ ->
+                    version ++ "/"
 
-        _ ->
+                Link.VersionsSubTarget ->
+                    ""
+
+        Nothing ->
             ""
 
 

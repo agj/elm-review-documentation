@@ -5,6 +5,7 @@ module Docs.Utils.Link exposing
     , SubTarget(..)
     , findLinks
     , parseExternalPackageLink
+    , subTargetVersion
     )
 
 import Elm.Project exposing (Project(..))
@@ -109,6 +110,19 @@ findLinks row moduleName string =
                         )
             )
         |> List.concat
+
+
+subTargetVersion : SubTarget -> Maybe String
+subTargetVersion subTarget =
+    case subTarget of
+        ReadmeSubTarget ver ->
+            Just ver
+
+        ModuleSubTarget ver _ ->
+            Just ver
+
+        VersionsSubTarget ->
+            Nothing
 
 
 linkParser : Int -> ModuleName -> Parser (Maybe (Node Link))
