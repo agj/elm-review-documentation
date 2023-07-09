@@ -985,6 +985,31 @@ a = 2
 """
                     |> Review.Test.runWithProjectData packageProjectWithoutFiles rule
                     |> Review.Test.expectNoErrors
+        , test "should report links to packages using absolute-path URLs when the project is not a package" <|
+            \() ->
+                """module A exposing (..)
+{-|
+[link](/packages/elm/core/latest/Basics#Int)
+-}
+a = 2
+"""
+                    |> Review.Test.run rule
+                    |> Review.Test.expectErrors
+                        [ Review.Test.error
+                            { message = "Link to package using absolute-path"
+                            , details =
+                                [ "Links to packages starting with \"/\" work great for docs viewed from the package site, but not for app docs."
+                                , "I suggest to run elm-review --fix to change the link to an absolute link (\"https://...\")."
+                                ]
+                            , under = "/packages/elm/core/latest/Basics#Int"
+                            }
+                            |> Review.Test.whenFixed """module A exposing (..)
+{-|
+[link](https://package.elm-lang.org/packages/elm/core/latest/Basics#Int)
+-}
+a = 2
+"""
+                        ]
         , test "should report links to an external resource without a protocol" <|
             \() ->
                 """module A exposing (..)
