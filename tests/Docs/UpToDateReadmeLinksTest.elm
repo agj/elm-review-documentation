@@ -50,13 +50,13 @@ packageElmJson name =
 }"""
 
 
-messageVersion : String
-messageVersion =
+message : String
+message =
     "Link does not point to the current version of the package"
 
 
-detailsVersion : List String
-detailsVersion =
+details : List String
+details =
     [ "I suggest to run elm-review --fix to get the correct link." ]
 
 
@@ -104,8 +104,8 @@ all =
                     |> testRule
                     |> Review.Test.expectErrorsForReadme
                         [ Review.Test.error
-                            { message = messageVersion
-                            , details = detailsVersion
+                            { message = message
+                            , details = details
                             , under = "https://package.elm-lang.org/packages/author/package/1.2.4/Module-Name"
                             }
                             |> Review.Test.whenFixed (readmeWithLink "https://package.elm-lang.org/packages/author/package/1.2.3/Module-Name/")
@@ -125,8 +125,8 @@ all =
                     |> testRule
                     |> Review.Test.expectErrorsForReadme
                         [ Review.Test.error
-                            { message = messageVersion
-                            , details = detailsVersion
+                            { message = message
+                            , details = details
                             , under = "/packages/author/package/1.2.4/Module-Name"
                             }
                             |> Review.Test.whenFixed (readmeWithLink "https://package.elm-lang.org/packages/author/package/1.2.4/Module-Name/")
@@ -162,16 +162,16 @@ all =
                     |> testRule
                     |> Review.Test.expectErrorsForReadme
                         [ Review.Test.error
-                            { message = messageVersion
-                            , details = detailsVersion
+                            { message = message
+                            , details = details
                             , under = "https://package.elm-lang.org/packages/author/package/1.2.4/A"
                             }
                             |> Review.Test.whenFixed """
 [link1](https://package.elm-lang.org/packages/author/package/1.2.3/A/) [link2](https://package.elm-lang.org/packages/author/package/1.2.4/B)
 """
                         , Review.Test.error
-                            { message = messageVersion
-                            , details = detailsVersion
+                            { message = message
+                            , details = details
                             , under = "https://package.elm-lang.org/packages/author/package/1.2.4/B"
                             }
                             |> Review.Test.whenFixed """
@@ -186,8 +186,8 @@ all =
                     |> testRule
                     |> Review.Test.expectErrorsForReadme
                         [ Review.Test.error
-                            { message = messageVersion
-                            , details = detailsVersion
+                            { message = message
+                            , details = details
                             , under = "https://package.elm-lang.org/packages/author/package/latest/Module-Name"
                             }
                             |> Review.Test.whenFixed (readmeWithLink "https://package.elm-lang.org/packages/author/package/1.2.3/Module-Name/")
@@ -200,8 +200,8 @@ all =
                     |> testRule
                     |> Review.Test.expectErrorsForReadme
                         [ Review.Test.error
-                            { message = messageVersion
-                            , details = detailsVersion
+                            { message = message
+                            , details = details
                             , under = "https://package.elm-lang.org/packages/au-tho5r/pack-age1/latest/Module-Name"
                             }
                             |> Review.Test.whenFixed (readmeWithLink "https://package.elm-lang.org/packages/au-tho5r/pack-age1/1.2.3/Module-Name/")
@@ -290,8 +290,8 @@ all =
                     |> testRule
                     |> Review.Test.expectErrorsForReadme
                         [ Review.Test.error
-                            { message = messageVersion
-                            , details = detailsVersion
+                            { message = message
+                            , details = details
                             , under = "https://package.elm-lang.org/packages/au-tho5r/pack-age1/latest/"
                             }
                             |> Review.Test.whenFixed """
