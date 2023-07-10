@@ -21,6 +21,7 @@ import Elm.Syntax.Node as Node exposing (Node(..))
 import Elm.Syntax.Range exposing (Range)
 import Elm.Version
 import Regex exposing (Regex)
+import Review.Fix as Fix
 import Review.Rule as Rule exposing (Rule)
 import Set exposing (Set)
 
@@ -628,20 +629,25 @@ errorForFile projectContext sectionsPerModule fileLinksAndSections (MaybeExposed
 
 reportErrorsForPackagesTarget : ProjectContext -> Dict ModuleName (List Section) -> FileLinksAndSections -> MaybeExposedLinkData -> { name : String, subTarget : Link.SubTarget } -> Maybe (Rule.Error scope)
 reportErrorsForPackagesTarget projectContext sectionsPerModule fileLinksAndSections maybeExposedLink { name, subTarget } =
-    let
-        version =
-            Link.subTargetVersion subTarget
-    in
-    case projectContext.packageNameAndVersion of
-        Just currentPackage ->
-            if name == currentPackage.name && (version == Just "latest" || version == Just currentPackage.version) then
-                reportErrorForCurrentPackageSubTarget projectContext sectionsPerModule fileLinksAndSections maybeExposedLink subTarget
+    case ( fileLinksAndSections.fileKey, maybeExposedLink.link.startsWith ) of
+        ( ReadmeKey readmeKey, Link.StartsWithSlash ) ->
+            Just (reportAbsolutePathLinkFromReadmeToPackage readmeKey maybeExposedLink.linkRange)
 
-            else
-                Nothing
+        _ ->
+            case projectContext.packageNameAndVersion of
+                Just currentPackage ->
+                    let
+                        version =
+                            Link.subTargetVersion subTarget
+                    in
+                    if name == currentPackage.name && (version == Just "latest" || version == Just currentPackage.version) then
+                        reportErrorForCurrentPackageSubTarget projectContext sectionsPerModule fileLinksAndSections maybeExposedLink subTarget
 
-        Nothing ->
-            Nothing
+                    else
+                        Nothing
+
+                Nothing ->
+                    Nothing
 
 
 reportErrorForCurrentPackageSubTarget : ProjectContext -> Dict ModuleName (List Section) -> FileLinksAndSections -> MaybeExposedLinkData -> Link.SubTarget -> Maybe (Rule.Error scope)
@@ -777,6 +783,19 @@ reportLinkToExternalResourceWithoutProtocol fileKey range =
             ]
         }
         range
+
+
+reportAbsolutePathLinkFromReadmeToPackage : Rule.ReadmeKey -> Range -> Rule.Error scope
+reportAbsolutePathLinkFromReadmeToPackage readmeKey range =
+    Rule.errorForReadmeWithFix readmeKey
+        { message = "README uses an absolute-path link to a package"
+        , details =
+            [ "Links starting with \"/\" don't work when looking at your README from GitHub or the likes."
+            , "I suggest to run elm-review --fix to change the link to an absolute link (\"https://...\")."
+            ]
+        }
+        range
+        [ Fix.replaceRangeBy range ("https://package.elm-lang.org/packages/" ++ "") ]
 
 
 duplicateSectionErrorDetails : { message : String, details : List String }
