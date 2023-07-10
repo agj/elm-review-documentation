@@ -631,7 +631,14 @@ reportErrorsForPackagesTarget : ProjectContext -> Dict ModuleName (List Section)
 reportErrorsForPackagesTarget projectContext sectionsPerModule fileLinksAndSections maybeExposedLink { name, subTarget } =
     case ( fileLinksAndSections.fileKey, maybeExposedLink.link.startsWith ) of
         ( ReadmeKey readmeKey, Link.StartsWithSlash ) ->
-            Just (reportAbsolutePathLinkFromReadmeToPackage readmeKey maybeExposedLink.linkRange)
+            Just
+                (reportAbsolutePathLinkFromReadmeToPackage readmeKey
+                    maybeExposedLink.linkRange
+                    { name = name
+                    , subTarget = subTarget
+                    , slug = maybeExposedLink.link.slug
+                    }
+                )
 
         _ ->
             case projectContext.packageNameAndVersion of
@@ -785,8 +792,12 @@ reportLinkToExternalResourceWithoutProtocol fileKey range =
         range
 
 
-reportAbsolutePathLinkFromReadmeToPackage : Rule.ReadmeKey -> Range -> Rule.Error scope
-reportAbsolutePathLinkFromReadmeToPackage readmeKey range =
+reportAbsolutePathLinkFromReadmeToPackage :
+    Rule.ReadmeKey
+    -> Range
+    -> { name : String, subTarget : Link.SubTarget, slug : Maybe String }
+    -> Rule.Error scope
+reportAbsolutePathLinkFromReadmeToPackage readmeKey range linkInfo =
     Rule.errorForReadmeWithFix readmeKey
         { message = "README uses an absolute-path link to a package"
         , details =
@@ -795,7 +806,7 @@ reportAbsolutePathLinkFromReadmeToPackage readmeKey range =
             ]
         }
         range
-        [ Fix.replaceRangeBy range ("https://package.elm-lang.org/packages/" ++ "") ]
+        [ Fix.replaceRangeBy range (Link.formatPackageLink linkInfo) ]
 
 
 duplicateSectionErrorDetails : { message : String, details : List String }
