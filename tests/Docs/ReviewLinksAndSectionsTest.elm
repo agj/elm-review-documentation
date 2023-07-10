@@ -1187,7 +1187,7 @@ absolutePathPackageLinksInReadme =
                             , details = detailsAbsolutePath
                             , under = "/packages/author/package/1.2.3/Module-Name"
                             }
-                            |> Review.Test.whenFixed (readmeWithLink "https://package.elm-lang.org/packages/author/package/1.2.3/Module-Name")
+                            |> Review.Test.whenFixed (readmeWithLink "https://package.elm-lang.org/packages/author/package/1.2.3/Module-Name/")
                         ]
         , test "should report links to a package's README using absolute paths from the README" <|
             \() ->
