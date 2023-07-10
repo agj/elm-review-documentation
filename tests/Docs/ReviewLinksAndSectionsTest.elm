@@ -37,7 +37,7 @@ messageAbsolutePath =
 
 detailsAbsolutePath : List String
 detailsAbsolutePath =
-    [ "Links starting with \"/\" don't work when looking at the docs from GitHub or the likes."
+    [ "Links starting with \"/\" don't work when looking at your README from GitHub or the likes."
     , "I suggest to run elm-review --fix to change the link to an absolute link (\"https://...\")."
     ]
 
