@@ -125,6 +125,7 @@ rule =
     Rule.newProjectRuleSchema "Docs.ReviewLinksAndSections" initialProjectContext
         |> Rule.withElmJsonProjectVisitor elmJsonVisitor
         |> Rule.withReadmeProjectVisitor readmeVisitor
+        |> Rule.providesFixesForProjectRule
         |> Rule.withModuleVisitor moduleVisitor
         |> Rule.withModuleContextUsingContextCreator
             { fromProjectToModule = fromProjectToModule
