@@ -4,7 +4,7 @@ import Docs.ReviewLinksAndSections exposing (rule)
 import Elm.Project
 import Json.Decode
 import Review.Project as Project exposing (Project)
-import Review.Test
+import Review.Test exposing (ReviewResult)
 import Test exposing (Test, describe, test)
 
 
@@ -26,7 +26,20 @@ all =
         , unnecessaryLinksTests
         , externalResourcesTests
         , linksWithAltTextTests
+        , absolutePathPackageLinksInReadme
         ]
+
+
+messageAbsolutePath : String
+messageAbsolutePath =
+    "README uses an absolute-path link to a package"
+
+
+detailsAbsolutePath : List String
+detailsAbsolutePath =
+    [ "Links starting with \"/\" don't work when looking at the docs from GitHub or the likes."
+    , "I suggest to run elm-review --fix to change the link to an absolute link (\"https://...\")."
+    ]
 
 
 localLinkTests : Test
@@ -1160,6 +1173,58 @@ a = 2
         ]
 
 
+absolutePathPackageLinksInReadme : Test
+absolutePathPackageLinksInReadme =
+    describe "Absolute-path package links in README"
+        [ test "should report links to a package's module using absolute paths from the README" <|
+            \() ->
+                Project.new
+                    |> addReadme (readmeWithLink "/packages/author/package/1.2.3/Module-Name")
+                    |> testRule
+                    |> Review.Test.expectErrorsForReadme
+                        [ Review.Test.error
+                            { message = messageAbsolutePath
+                            , details = detailsAbsolutePath
+                            , under = "/packages/author/package/1.2.3/Module-Name"
+                            }
+                            |> Review.Test.whenFixed (readmeWithLink "https://package.elm-lang.org/packages/author/package/1.2.3/Module-Name")
+                        ]
+        , test "should report links to a package's README using absolute paths from the README" <|
+            \() ->
+                Project.new
+                    |> addReadme (readmeWithLink "/packages/author/package/1.2.3/")
+                    |> testRule
+                    |> Review.Test.expectErrorsForReadme
+                        [ Review.Test.error
+                            { message = messageAbsolutePath
+                            , details = detailsAbsolutePath
+                            , under = "/packages/author/package/1.2.3/"
+                            }
+                            |> Review.Test.whenFixed (readmeWithLink "https://package.elm-lang.org/packages/author/package/1.2.3/")
+                        ]
+        , test "should report links to a package's versions page using absolute paths from the README" <|
+            \() ->
+                Project.new
+                    |> addReadme (readmeWithLink "/packages/author/package/")
+                    |> testRule
+                    |> Review.Test.expectErrorsForReadme
+                        [ Review.Test.error
+                            { message = messageAbsolutePath
+                            , details = detailsAbsolutePath
+                            , under = "/packages/author/package/"
+                            }
+                            |> Review.Test.whenFixed (readmeWithLink "https://package.elm-lang.org/packages/author/package/")
+                        ]
+        ]
+
+
+testRule : Project -> ReviewResult
+testRule project =
+    """module SomeModule exposing (a)
+a = 1"""
+        |> Review.Test.runWithProjectData project rule
+
+
 packageProject : Project
 packageProject =
     Project.addModule
@@ -1201,3 +1266,17 @@ elmJson =
     },
     "test-dependencies": {}
 }"""
+
+
+addReadme : String -> Project -> Project
+addReadme content =
+    Project.addReadme { path = "README.md", content = content }
+
+
+readmeWithLink : String -> String
+readmeWithLink link =
+    """
+# My project
+
+  - [my project's thing](""" ++ link ++ """)
+"""
