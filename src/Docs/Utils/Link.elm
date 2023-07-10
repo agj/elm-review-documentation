@@ -4,6 +4,9 @@ module Docs.Utils.Link exposing
     , StartsWith(..)
     , SubTarget(..)
     , findLinks
+    , formatPackageLink
+    , formatPackageLinkForVersion
+    , formatSlug
     , parseExternalPackageLink
     , subTargetVersion
     )
@@ -123,6 +126,48 @@ subTargetVersion subTarget =
 
         VersionsSubTarget ->
             Nothing
+
+
+formatPackageLink : { name : String, subTarget : SubTarget, slug : Maybe String } -> String
+formatPackageLink attrs =
+    formatPackageLinkForVersion (subTargetVersion attrs.subTarget) attrs
+
+
+formatPackageLinkForVersion : Maybe String -> { name : String, subTarget : SubTarget, slug : Maybe String } -> String
+formatPackageLinkForVersion versionMaybe { name, subTarget, slug } =
+    "https://package.elm-lang.org/packages/"
+        ++ name
+        ++ "/"
+        ++ formatSubTargetForVersion versionMaybe subTarget
+        ++ formatSlug slug
+
+
+formatSubTargetForVersion : Maybe String -> SubTarget -> String
+formatSubTargetForVersion versionMaybe subTarget =
+    case versionMaybe of
+        Just version ->
+            case subTarget of
+                ModuleSubTarget _ moduleName ->
+                    version ++ "/" ++ String.join "-" moduleName ++ "/"
+
+                ReadmeSubTarget _ ->
+                    version ++ "/"
+
+                VersionsSubTarget ->
+                    ""
+
+        Nothing ->
+            ""
+
+
+formatSlug : Maybe String -> String
+formatSlug maybeSlug =
+    case maybeSlug of
+        Just slug ->
+            "#" ++ slug
+
+        Nothing ->
+            ""
 
 
 linkParser : Int -> ModuleName -> Parser (Maybe (Node Link))

@@ -122,7 +122,7 @@ reportError context readmeKey (Node range link) =
                     ]
                 }
                 range
-                [ Fix.replaceRangeBy range <| "https://package.elm-lang.org/packages/" ++ context.projectName ++ "/" ++ context.version ++ "/" ++ String.join "-" moduleName ++ formatSlug link.slug ]
+                [ Fix.replaceRangeBy range <| "https://package.elm-lang.org/packages/" ++ context.projectName ++ "/" ++ context.version ++ "/" ++ String.join "-" moduleName ++ Link.formatSlug link.slug ]
             ]
 
         Link.ReadmeTarget ->
@@ -162,7 +162,7 @@ reportError context readmeKey (Node range link) =
                     }
                     range
                     [ Fix.replaceRangeBy range
-                        (formatPackageLinkForVersion linkVersion
+                        (Link.formatPackageLinkForVersion linkVersion
                             { name = name, subTarget = subTarget, slug = link.slug }
                         )
                     ]
@@ -175,7 +175,7 @@ reportError context readmeKey (Node range link) =
                     }
                     range
                     [ Fix.replaceRangeBy range
-                        (formatPackageLinkForVersion (Just context.version)
+                        (Link.formatPackageLinkForVersion (Just context.version)
                             { name = name, subTarget = subTarget, slug = link.slug }
                         )
                     ]
@@ -186,40 +186,3 @@ reportError context readmeKey (Node range link) =
 
         Link.External _ ->
             []
-
-
-formatPackageLinkForVersion : Maybe String -> { name : String, subTarget : Link.SubTarget, slug : Maybe String } -> String
-formatPackageLinkForVersion versionMaybe { name, subTarget, slug } =
-    "https://package.elm-lang.org/packages/"
-        ++ name
-        ++ "/"
-        ++ formatSubTargetForVersion versionMaybe subTarget
-        ++ formatSlug slug
-
-
-formatSubTargetForVersion : Maybe String -> Link.SubTarget -> String
-formatSubTargetForVersion versionMaybe subTarget =
-    case versionMaybe of
-        Just version ->
-            case subTarget of
-                Link.ModuleSubTarget _ moduleName ->
-                    version ++ "/" ++ String.join "-" moduleName ++ "/"
-
-                Link.ReadmeSubTarget _ ->
-                    version ++ "/"
-
-                Link.VersionsSubTarget ->
-                    ""
-
-        Nothing ->
-            ""
-
-
-formatSlug : Maybe String -> String
-formatSlug maybeSlug =
-    case maybeSlug of
-        Just slug ->
-            "#" ++ slug
-
-        Nothing ->
-            ""
