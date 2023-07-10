@@ -630,15 +630,7 @@ reportErrorsForPackagesTarget : ProjectContext -> Dict ModuleName (List Section)
 reportErrorsForPackagesTarget projectContext sectionsPerModule fileLinksAndSections maybeExposedLink { name, subTarget } =
     let
         version =
-            case subTarget of
-                Link.ReadmeSubTarget ver ->
-                    Just ver
-
-                Link.ModuleSubTarget ver _ ->
-                    Just ver
-
-                _ ->
-                    Nothing
+            Link.subTargetVersion subTarget
     in
     case projectContext.packageNameAndVersion of
         Just currentPackage ->
