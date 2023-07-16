@@ -152,23 +152,7 @@ reportError context readmeKey (Node range link) =
                 linkVersion =
                     Link.subTargetVersion subTarget
             in
-            if link.startsWith == Link.StartsWithSlash then
-                [ Rule.errorForReadmeWithFix readmeKey
-                    { message = "README link uses an absolute-path"
-                    , details =
-                        [ "Links starting with \"/\" don't work when looking at the docs from GitHub or the likes."
-                        , "I suggest to run elm-review --fix to change the link to an absolute link (\"https://...\")."
-                        ]
-                    }
-                    range
-                    [ Fix.replaceRangeBy range
-                        (Link.formatPackageLinkForVersion linkVersion
-                            { name = name, subTarget = subTarget, slug = link.slug }
-                        )
-                    ]
-                ]
-
-            else if context.projectName == name && Just context.version /= linkVersion then
+            if context.projectName == name && Just context.version /= linkVersion then
                 [ Rule.errorForReadmeWithFix readmeKey
                     { message = "Link does not point to the current version of the package"
                     , details = [ "I suggest to run elm-review --fix to get the correct link." ]
