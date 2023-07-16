@@ -1018,7 +1018,7 @@ a = 2
                             }
                             |> Review.Test.whenFixed """module A exposing (..)
 {-|
-[link](https://package.elm-lang.org/packages/elm/core/latest/Basics#Int)
+[link](https://package.elm-lang.org/packages/elm/core/latest/Basics/#Int)
 -}
 a = 2
 """
