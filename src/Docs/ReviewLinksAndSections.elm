@@ -21,7 +21,7 @@ import Elm.Syntax.Node as Node exposing (Node(..))
 import Elm.Syntax.Range exposing (Range)
 import Elm.Version
 import Regex exposing (Regex)
-import Review.Fix as Fix
+import Review.Fix as Fix exposing (Fix)
 import Review.Rule as Rule exposing (Rule)
 import Set exposing (Set)
 
@@ -630,8 +630,9 @@ errorForFile projectContext sectionsPerModule fileLinksAndSections (MaybeExposed
 
 reportErrorsForPackagesTarget : ProjectContext -> Dict ModuleName (List Section) -> FileLinksAndSections -> MaybeExposedLinkData -> { name : String, subTarget : Link.SubTarget } -> Maybe (Rule.Error scope)
 reportErrorsForPackagesTarget projectContext sectionsPerModule fileLinksAndSections maybeExposedLink { name, subTarget } =
-    case ( fileLinksAndSections.fileKey, maybeExposedLink.link.startsWith ) of
-        ( ReadmeKey readmeKey, Link.StartsWithSlash ) ->
+    case ( projectContext.packageNameAndVersion, fileLinksAndSections.fileKey, maybeExposedLink.link.startsWith ) of
+        ( _, ReadmeKey readmeKey, Link.StartsWithSlash ) ->
+            -- Readme with absolute-path link
             Just
                 (reportAbsolutePathLinkFromReadmeToPackage readmeKey
                     maybeExposedLink.linkRange
@@ -641,21 +642,31 @@ reportErrorsForPackagesTarget projectContext sectionsPerModule fileLinksAndSecti
                     }
                 )
 
+        ( Nothing, _, Link.StartsWithSlash ) ->
+            -- App project with absolute-path link
+            Just
+                (reportAbsolutePathLinkInAppProject fileLinksAndSections.fileKey
+                    maybeExposedLink.linkRange
+                    { name = name
+                    , subTarget = subTarget
+                    , slug = maybeExposedLink.link.slug
+                    }
+                )
+
+        ( Just currentPackage, _, _ ) ->
+            -- Package project
+            let
+                version =
+                    Link.subTargetVersion subTarget
+            in
+            if name == currentPackage.name && (version == Just "latest" || version == Just currentPackage.version) then
+                reportErrorForCurrentPackageSubTarget projectContext sectionsPerModule fileLinksAndSections maybeExposedLink subTarget
+
+            else
+                Nothing
+
         _ ->
-            case projectContext.packageNameAndVersion of
-                Just currentPackage ->
-                    let
-                        version =
-                            Link.subTargetVersion subTarget
-                    in
-                    if name == currentPackage.name && (version == Just "latest" || version == Just currentPackage.version) then
-                        reportErrorForCurrentPackageSubTarget projectContext sectionsPerModule fileLinksAndSections maybeExposedLink subTarget
-
-                    else
-                        Nothing
-
-                Nothing ->
-                    Nothing
+            Nothing
 
 
 reportErrorForCurrentPackageSubTarget : ProjectContext -> Dict ModuleName (List Section) -> FileLinksAndSections -> MaybeExposedLinkData -> Link.SubTarget -> Maybe (Rule.Error scope)
@@ -810,6 +821,23 @@ reportAbsolutePathLinkFromReadmeToPackage readmeKey range linkInfo =
         [ Fix.replaceRangeBy range (Link.formatPackageLink linkInfo) ]
 
 
+reportAbsolutePathLinkInAppProject :
+    FileKey
+    -> Range
+    -> { name : String, subTarget : Link.SubTarget, slug : Maybe String }
+    -> Rule.Error scope
+reportAbsolutePathLinkInAppProject fileKey range linkInfo =
+    reportForFileWithFix fileKey
+        { message = "Link to package using absolute path"
+        , details =
+            [ "Links to packages starting with \"/\" work great for docs viewed from the package site, but not for app docs."
+            , "I suggest to run elm-review --fix to change the link to an absolute link (\"https://...\")."
+            ]
+        }
+        range
+        [ Fix.replaceRangeBy range (Link.formatPackageLink linkInfo) ]
+
+
 duplicateSectionErrorDetails : { message : String, details : List String }
 duplicateSectionErrorDetails =
     { message = "Duplicate section"
@@ -825,6 +853,16 @@ reportForFile fileKey =
 
         ReadmeKey readmeKey ->
             Rule.errorForReadme readmeKey
+
+
+reportForFileWithFix : FileKey -> { message : String, details : List String } -> Range -> List Fix -> Rule.Error scope
+reportForFileWithFix fileKey =
+    case fileKey of
+        ModuleKey moduleKey ->
+            Rule.errorForModuleWithFix moduleKey
+
+        ReadmeKey readmeKey ->
+            Rule.errorForReadmeWithFix readmeKey
 
 
 find : (a -> Bool) -> List a -> Maybe a
