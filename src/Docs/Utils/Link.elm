@@ -128,14 +128,27 @@ subTargetVersion subTarget =
             Nothing
 
 
-formatPackageLink : { name : String, subTarget : SubTarget, slug : Maybe String } -> String
+formatPackageLink :
+    { name : String, subTarget : SubTarget, slug : Maybe String, absolutePath : Bool }
+    -> String
 formatPackageLink attrs =
     formatPackageLinkForVersion (subTargetVersion attrs.subTarget) attrs
 
 
-formatPackageLinkForVersion : Maybe String -> { name : String, subTarget : SubTarget, slug : Maybe String } -> String
-formatPackageLinkForVersion versionMaybe { name, subTarget, slug } =
-    "https://package.elm-lang.org/packages/"
+formatPackageLinkForVersion :
+    Maybe String
+    -> { name : String, subTarget : SubTarget, slug : Maybe String, absolutePath : Bool }
+    -> String
+formatPackageLinkForVersion versionMaybe { name, subTarget, slug, absolutePath } =
+    let
+        linkStart =
+            if absolutePath then
+                "/packages/"
+
+            else
+                "https://package.elm-lang.org/packages/"
+    in
+    linkStart
         ++ name
         ++ "/"
         ++ formatSubTargetForVersion versionMaybe subTarget

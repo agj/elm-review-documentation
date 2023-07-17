@@ -160,7 +160,11 @@ reportError context readmeKey (Node range link) =
                     range
                     [ Fix.replaceRangeBy range
                         (Link.formatPackageLinkForVersion (Just context.version)
-                            { name = name, subTarget = subTarget, slug = link.slug }
+                            { name = name
+                            , subTarget = subTarget
+                            , slug = link.slug
+                            , absolutePath = link.startsWith == Link.StartsWithSlash
+                            }
                         )
                     ]
                 ]

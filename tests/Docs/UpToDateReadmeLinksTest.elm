@@ -129,7 +129,7 @@ all =
                             , details = details
                             , under = "/packages/author/package/1.2.4/Module-Name"
                             }
-                            |> Review.Test.whenFixed (readmeWithLink "https://package.elm-lang.org/packages/author/package/1.2.4/Module-Name/")
+                            |> Review.Test.whenFixed (readmeWithLink "/packages/author/package/1.2.3/Module-Name/")
                         ]
         , test "should not report an error if a link points to any package's module using an absolute-path URL" <|
             \() ->

@@ -639,6 +639,7 @@ reportErrorsForPackagesTarget projectContext sectionsPerModule fileLinksAndSecti
                     { name = name
                     , subTarget = subTarget
                     , slug = maybeExposedLink.link.slug
+                    , absolutePath = False
                     }
                 )
 
@@ -650,6 +651,7 @@ reportErrorsForPackagesTarget projectContext sectionsPerModule fileLinksAndSecti
                     { name = name
                     , subTarget = subTarget
                     , slug = maybeExposedLink.link.slug
+                    , absolutePath = False
                     }
                 )
 
@@ -807,7 +809,7 @@ reportLinkToExternalResourceWithoutProtocol fileKey range =
 reportAbsolutePathLinkFromReadmeToPackage :
     Rule.ReadmeKey
     -> Range
-    -> { name : String, subTarget : Link.SubTarget, slug : Maybe String }
+    -> { name : String, subTarget : Link.SubTarget, slug : Maybe String, absolutePath : Bool }
     -> Rule.Error scope
 reportAbsolutePathLinkFromReadmeToPackage readmeKey range linkInfo =
     Rule.errorForReadmeWithFix readmeKey
@@ -824,7 +826,7 @@ reportAbsolutePathLinkFromReadmeToPackage readmeKey range linkInfo =
 reportAbsolutePathLinkInAppProject :
     FileKey
     -> Range
-    -> { name : String, subTarget : Link.SubTarget, slug : Maybe String }
+    -> { name : String, subTarget : Link.SubTarget, slug : Maybe String, absolutePath : Bool }
     -> Rule.Error scope
 reportAbsolutePathLinkInAppProject fileKey range linkInfo =
     reportForFileWithFix fileKey
