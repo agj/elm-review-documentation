@@ -11,6 +11,8 @@ parseExternalPackageLinkTest =
         [ describe "URLs with author and name"
             ([ "https://package.elm-lang.org/packages/elm/regex"
              , "https://package.elm-lang.org/packages/elm/regex/"
+             , "http://package.elm-lang.org/packages/elm/regex"
+             , "http://package.elm-lang.org/packages/elm/regex/"
              ]
                 |> List.map
                     (\url ->
@@ -53,6 +55,8 @@ parseExternalPackageLinkTest =
         , describe "URLs with author, name and version"
             ([ "https://package.elm-lang.org/packages/elm/regex/1.1.1"
              , "https://package.elm-lang.org/packages/elm/regex/1.1.1/"
+             , "http://package.elm-lang.org/packages/elm/regex/1.1.1"
+             , "http://package.elm-lang.org/packages/elm/regex/1.1.1/"
              ]
                 |> List.map
                     (\url ->
@@ -94,6 +98,7 @@ parseExternalPackageLinkTest =
             )
         , describe "URLs with author, name, version and module"
             ([ "https://package.elm-lang.org/packages/elm/regex/1.1.1/Regex"
+             , "http://package.elm-lang.org/packages/elm/regex/1.1.1/Regex"
              ]
                 |> List.map
                     (\url ->
@@ -134,6 +139,7 @@ parseExternalPackageLinkTest =
             )
         , describe "URLs with author, name, version, module and section"
             ([ "https://package.elm-lang.org/packages/elm/regex/1.1.1/Regex#replace"
+             , "http://package.elm-lang.org/packages/elm/regex/1.1.1/Regex#replace"
              ]
                 |> List.map
                     (\url ->
