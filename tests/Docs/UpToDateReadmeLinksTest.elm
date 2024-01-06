@@ -110,6 +110,20 @@ all =
                             }
                             |> Review.Test.whenFixed (readmeWithLink "https://package.elm-lang.org/packages/author/package/1.2.3/Module-Name/")
                         ]
+        , test "should report an error if a link points to a different version of own package (using HTTP)" <|
+            \() ->
+                Project.new
+                    |> Project.addElmJson (createElmJson <| packageElmJson "author/package")
+                    |> addReadme "http://package.elm-lang.org/packages/author/package/1.2.4/Module-Name"
+                    |> testRule
+                    |> Review.Test.expectErrorsForReadme
+                        [ Review.Test.error
+                            { message = message
+                            , details = details
+                            , under = "http://package.elm-lang.org/packages/author/package/1.2.4/Module-Name"
+                            }
+                            |> Review.Test.whenFixed (readmeWithLink "https://package.elm-lang.org/packages/author/package/1.2.3/Module-Name/")
+                        ]
         , test "should not report an error if there are absolute-path links pointing to current version of own package" <|
             \() ->
                 Project.new
