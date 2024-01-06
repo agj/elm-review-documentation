@@ -1216,17 +1216,3 @@ elmJson =
     },
     "test-dependencies": {}
 }"""
-
-
-addReadme : String -> Project -> Project
-addReadme content =
-    Project.addReadme { path = "README.md", content = content }
-
-
-readmeWithLink : String -> String
-readmeWithLink link =
-    """
-# My project
-
-  - [my project's thing](""" ++ link ++ """)
-"""
