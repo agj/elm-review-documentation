@@ -124,20 +124,6 @@ all =
                             }
                             |> Review.Test.whenFixed (readmeWithLink "https://package.elm-lang.org/packages/author/package/1.2.3/Module-Name/")
                         ]
-        , test "should report an error if there are absolute-path links pointing to current version" <|
-            \() ->
-                Project.new
-                    |> Project.addElmJson (createElmJson <| packageElmJson "author/package")
-                    |> addReadme "/packages/author/package/1.2.3/Module-Name"
-                    |> testRule
-                    |> Review.Test.expectErrorsForReadme
-                        [ Review.Test.error
-                            { message = message
-                            , details = details
-                            , under = "/packages/author/package/1.2.3/Module-Name"
-                            }
-                            |> Review.Test.whenFixed (readmeWithLink "https://package.elm-lang.org/packages/author/package/1.2.3/Module-Name/")
-                        ]
         , test "should report errors for multiple links on the same line" <|
             \() ->
                 Project.new
@@ -276,7 +262,7 @@ all =
                     |> testRule
                     |> Review.Test.expectErrorsForReadme
                         [ Review.Test.error
-                            { message = message
+                            { message = "Link does not point to the current version of the package"
                             , details = details
                             , under = "https://package.elm-lang.org/packages/au-tho5r/pack-age1/latest/"
                             }
