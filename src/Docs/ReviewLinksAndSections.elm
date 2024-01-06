@@ -630,20 +630,8 @@ errorForFile projectContext sectionsPerModule fileLinksAndSections (MaybeExposed
 
 reportErrorsForPackagesTarget : ProjectContext -> Dict ModuleName (List Section) -> FileLinksAndSections -> MaybeExposedLinkData -> { name : String, subTarget : Link.SubTarget } -> Maybe (Rule.Error scope)
 reportErrorsForPackagesTarget projectContext sectionsPerModule fileLinksAndSections maybeExposedLink { name, subTarget } =
-    case ( projectContext.packageNameAndVersion, fileLinksAndSections.fileKey, maybeExposedLink.link.startsWith ) of
-        ( _, ReadmeKey readmeKey, Link.StartsWithSlash ) ->
-            -- Readme with absolute-path link
-            Just
-                (reportAbsolutePathLinkFromReadmeToPackage readmeKey
-                    maybeExposedLink.linkRange
-                    { name = name
-                    , subTarget = subTarget
-                    , slug = maybeExposedLink.link.slug
-                    , absolutePath = False
-                    }
-                )
-
-        ( Nothing, _, Link.StartsWithSlash ) ->
+    case ( projectContext.packageNameAndVersion, maybeExposedLink.link.startsWith ) of
+        ( Nothing, Link.StartsWithSlash ) ->
             -- App project with absolute-path link
             Just
                 (reportAbsolutePathLinkInAppProject fileLinksAndSections.fileKey
@@ -655,7 +643,7 @@ reportErrorsForPackagesTarget projectContext sectionsPerModule fileLinksAndSecti
                     }
                 )
 
-        ( Just currentPackage, _, _ ) ->
+        ( Just currentPackage, _ ) ->
             -- Package project
             let
                 version =
@@ -804,23 +792,6 @@ reportLinkToExternalResourceWithoutProtocol fileKey range =
             ]
         }
         range
-
-
-reportAbsolutePathLinkFromReadmeToPackage :
-    Rule.ReadmeKey
-    -> Range
-    -> { name : String, subTarget : Link.SubTarget, slug : Maybe String, absolutePath : Bool }
-    -> Rule.Error scope
-reportAbsolutePathLinkFromReadmeToPackage readmeKey range linkInfo =
-    Rule.errorForReadmeWithFix readmeKey
-        { message = "README uses an absolute-path link to a package"
-        , details =
-            [ "Links starting with \"/\" don't work when looking at your README from GitHub or the likes."
-            , "I suggest to run elm-review --fix to change the link to an absolute link (\"https://...\")."
-            ]
-        }
-        range
-        [ Fix.replaceRangeBy range (Link.formatPackageLink linkInfo) ]
 
 
 reportAbsolutePathLinkInAppProject :
