@@ -631,18 +631,6 @@ errorForFile projectContext sectionsPerModule fileLinksAndSections (MaybeExposed
 reportErrorsForPackagesTarget : ProjectContext -> Dict ModuleName (List Section) -> FileLinksAndSections -> MaybeExposedLinkData -> { name : String, subTarget : Link.SubTarget } -> Maybe (Rule.Error scope)
 reportErrorsForPackagesTarget projectContext sectionsPerModule fileLinksAndSections maybeExposedLink { name, subTarget } =
     case ( projectContext.packageNameAndVersion, maybeExposedLink.link.startsWith ) of
-        ( Nothing, Link.StartsWithSlash ) ->
-            -- App project with absolute-path link
-            Just
-                (reportAbsolutePathLinkInAppProject fileLinksAndSections.fileKey
-                    maybeExposedLink.linkRange
-                    { name = name
-                    , subTarget = subTarget
-                    , slug = maybeExposedLink.link.slug
-                    , absolutePath = False
-                    }
-                )
-
         ( Just currentPackage, _ ) ->
             -- Package project
             let
@@ -654,6 +642,18 @@ reportErrorsForPackagesTarget projectContext sectionsPerModule fileLinksAndSecti
 
             else
                 Nothing
+
+        ( Nothing, Link.StartsWithSlash ) ->
+            -- App project with absolute-path link
+            Just
+                (reportAbsolutePathLinkInAppProject fileLinksAndSections.fileKey
+                    maybeExposedLink.linkRange
+                    { name = name
+                    , subTarget = subTarget
+                    , slug = maybeExposedLink.link.slug
+                    , absolutePath = False
+                    }
+                )
 
         _ ->
             Nothing
