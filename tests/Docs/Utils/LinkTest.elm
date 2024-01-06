@@ -7,64 +7,11 @@ import Test exposing (Test, describe, test)
 
 parseExternalPackageLinkTest : Test
 parseExternalPackageLinkTest =
-    let
-        urlsWithAuthorName =
-            [ "https://package.elm-lang.org/packages/elm/regex"
-            , "https://package.elm-lang.org/packages/elm/regex/"
-            ]
-
-        absolutePathUrlsWithAuthorName =
-            [ "/packages/elm/regex"
-            , "/packages/elm/regex/"
-            ]
-
-        urlsWithAuthorNameVersion =
-            [ "https://package.elm-lang.org/packages/elm/regex/1.1.1"
-            , "https://package.elm-lang.org/packages/elm/regex/1.1.1/"
-            ]
-
-        absolutePathUrlsWithAuthorNameVersion =
-            [ "/packages/elm/regex/1.1.1"
-            , "/packages/elm/regex/1.1.1/"
-            ]
-
-        urlsWithAuthorNameVersionModule =
-            [ "https://package.elm-lang.org/packages/elm/regex/1.1.1/Regex"
-            ]
-
-        absolutePathUrlsWithAuthorNameVersionModule =
-            [ "/packages/elm/regex/1.1.1/Regex"
-            ]
-
-        urlsWithAuthorNameVersionModuleSection =
-            [ "https://package.elm-lang.org/packages/elm/regex/1.1.1/Regex#replace"
-            ]
-
-        absolutePathUrlsWithAuthorNameVersionModuleSection =
-            [ "/packages/elm/regex/1.1.1/Regex#replace"
-            ]
-
-        invalidPackageUrls =
-            [ "https://www.example.com/packages/elm/regex"
-            , "https://www.example.com/packages/elm/regex/1.1.1/"
-            , "https://www.example.com/packages/elm/regex/1.1.1/Regex"
-            , "https://www.example.com/packages/elm/regex/1.1.1/Regex#replace"
-            , "https://package.elm-lang.org/wrong/elm/regex"
-            , "https://package.elm-lang.org/wrong/elm/regex/1.1.1/"
-            , "https://package.elm-lang.org/wrong/elm/regex/1.1.1/Regex"
-            , "https://package.elm-lang.org/wrong/elm/regex/1.1.1/Regex#replace"
-            , "https://package.elm-lang.org/packages/elm/"
-            , "ftp://package.elm-lang.org/packages/elm/regex/1.1.1/Regex#replace"
-            , "/wrong/elm/regex"
-            , "/wrong/elm/regex/1.1.1/"
-            , "/wrong/elm/regex/1.1.1/Regex"
-            , "/wrong/elm/regex/1.1.1/Regex#replace"
-            , "/packages/elm/"
-            ]
-    in
     describe "parseExternalPackageLink"
         [ describe "URLs with author and name"
-            (urlsWithAuthorName
+            ([ "https://package.elm-lang.org/packages/elm/regex"
+             , "https://package.elm-lang.org/packages/elm/regex/"
+             ]
                 |> List.map
                     (\url ->
                         test ("should parse: " ++ url) <|
@@ -83,7 +30,9 @@ parseExternalPackageLinkTest =
                     )
             )
         , describe "Absolute-path URLs with author and name"
-            (absolutePathUrlsWithAuthorName
+            ([ "/packages/elm/regex"
+             , "/packages/elm/regex/"
+             ]
                 |> List.map
                     (\url ->
                         test ("should parse: " ++ url) <|
@@ -102,7 +51,9 @@ parseExternalPackageLinkTest =
                     )
             )
         , describe "URLs with author, name and version"
-            (urlsWithAuthorNameVersion
+            ([ "https://package.elm-lang.org/packages/elm/regex/1.1.1"
+             , "https://package.elm-lang.org/packages/elm/regex/1.1.1/"
+             ]
                 |> List.map
                     (\url ->
                         test ("should parse: " ++ url) <|
@@ -121,7 +72,9 @@ parseExternalPackageLinkTest =
                     )
             )
         , describe "Absolute-path URLs with author, name and version"
-            (absolutePathUrlsWithAuthorNameVersion
+            ([ "/packages/elm/regex/1.1.1"
+             , "/packages/elm/regex/1.1.1/"
+             ]
                 |> List.map
                     (\url ->
                         test ("should parse: " ++ url) <|
@@ -140,7 +93,8 @@ parseExternalPackageLinkTest =
                     )
             )
         , describe "URLs with author, name, version and module"
-            (urlsWithAuthorNameVersionModule
+            ([ "https://package.elm-lang.org/packages/elm/regex/1.1.1/Regex"
+             ]
                 |> List.map
                     (\url ->
                         test ("should parse: " ++ url) <|
@@ -159,7 +113,8 @@ parseExternalPackageLinkTest =
                     )
             )
         , describe "Absolute-path URLs with author, name, version and module"
-            (absolutePathUrlsWithAuthorNameVersionModule
+            ([ "/packages/elm/regex/1.1.1/Regex"
+             ]
                 |> List.map
                     (\url ->
                         test ("should parse: " ++ url) <|
@@ -178,7 +133,8 @@ parseExternalPackageLinkTest =
                     )
             )
         , describe "URLs with author, name, version, module and section"
-            (urlsWithAuthorNameVersionModuleSection
+            ([ "https://package.elm-lang.org/packages/elm/regex/1.1.1/Regex#replace"
+             ]
                 |> List.map
                     (\url ->
                         test ("should parse: " ++ url) <|
@@ -197,7 +153,8 @@ parseExternalPackageLinkTest =
                     )
             )
         , describe "Absolute-path URLs with author, name, version, module and section"
-            (absolutePathUrlsWithAuthorNameVersionModuleSection
+            ([ "/packages/elm/regex/1.1.1/Regex#replace"
+             ]
                 |> List.map
                     (\url ->
                         test ("should parse: " ++ url) <|
@@ -216,7 +173,22 @@ parseExternalPackageLinkTest =
                     )
             )
         , describe "Invalid package URLs"
-            (invalidPackageUrls
+            ([ "https://www.example.com/packages/elm/regex"
+             , "https://www.example.com/packages/elm/regex/1.1.1/"
+             , "https://www.example.com/packages/elm/regex/1.1.1/Regex"
+             , "https://www.example.com/packages/elm/regex/1.1.1/Regex#replace"
+             , "https://package.elm-lang.org/wrong/elm/regex"
+             , "https://package.elm-lang.org/wrong/elm/regex/1.1.1/"
+             , "https://package.elm-lang.org/wrong/elm/regex/1.1.1/Regex"
+             , "https://package.elm-lang.org/wrong/elm/regex/1.1.1/Regex#replace"
+             , "https://package.elm-lang.org/packages/elm/"
+             , "ftp://package.elm-lang.org/packages/elm/regex/1.1.1/Regex#replace"
+             , "/wrong/elm/regex"
+             , "/wrong/elm/regex/1.1.1/"
+             , "/wrong/elm/regex/1.1.1/Regex"
+             , "/wrong/elm/regex/1.1.1/Regex#replace"
+             , "/packages/elm/"
+             ]
                 |> List.map
                     (\url ->
                         test ("should fail to parse: " ++ url) <|
