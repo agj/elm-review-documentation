@@ -11,15 +11,12 @@ module Docs.Utils.Link exposing
     , subTargetVersion
     )
 
-import Elm.Project exposing (Project(..))
-import Elm.Syntax.File exposing (File)
 import Elm.Syntax.ModuleName exposing (ModuleName)
 import Elm.Syntax.Node exposing (Node(..))
 import Elm.Syntax.Range exposing (Location, Range)
 import Parser exposing ((|.), (|=), Parser)
-import Regex exposing (Regex)
 import String
-import Url exposing (Url)
+import Url
 import Url.Parser exposing ((</>))
 
 
@@ -141,6 +138,7 @@ formatPackageLinkForVersion :
     -> String
 formatPackageLinkForVersion versionMaybe { name, subTarget, slug, absolutePath } =
     let
+        linkStart : String
         linkStart =
             if absolutePath then
                 "/packages/"
@@ -360,51 +358,6 @@ parseModuleName =
 parseExternalPackageLink : String -> Maybe { fileTarget : FileTarget, startsWithSlash : Bool }
 parseExternalPackageLink urlString =
     let
-        authorName =
-            Url.Parser.s "packages"
-                </> Url.Parser.string
-                </> Url.Parser.string
-
-        authorNameVersion =
-            authorName
-                </> Url.Parser.string
-
-        authorNameVersionModule =
-            authorNameVersion
-                </> Url.Parser.string
-                </> Url.Parser.fragment identity
-
-        parser =
-            Url.Parser.oneOf
-                [ authorName
-                    |> Url.Parser.map
-                        (\author name ->
-                            PackagesTarget
-                                { name = author ++ "/" ++ name
-                                , subTarget = VersionsSubTarget
-                                }
-                        )
-                , authorNameVersion
-                    |> Url.Parser.map
-                        (\author name version ->
-                            PackagesTarget
-                                { name = author ++ "/" ++ name
-                                , subTarget = ReadmeSubTarget version
-                                }
-                        )
-                , authorNameVersionModule
-                    |> Url.Parser.map
-                        (\author name version module_ _ ->
-                            PackagesTarget
-                                { name = author ++ "/" ++ name
-                                , subTarget =
-                                    module_
-                                        |> String.split "-"
-                                        |> ModuleSubTarget version
-                                }
-                        )
-                ]
-
         ( urlMaybe, startsWithSlash ) =
             case Url.fromString urlString of
                 Just u ->
@@ -421,7 +374,7 @@ parseExternalPackageLink urlString =
         |> Maybe.andThen
             (\url ->
                 if url.host == "package.elm-lang.org" then
-                    Url.Parser.parse parser url
+                    Url.Parser.parse packageLinkParser url
                         |> Maybe.map
                             (\fileTarget ->
                                 { fileTarget = fileTarget
@@ -432,6 +385,59 @@ parseExternalPackageLink urlString =
                 else
                     Nothing
             )
+
+
+packageLinkParser : Url.Parser.Parser (FileTarget -> c) c
+packageLinkParser =
+    Url.Parser.oneOf
+        [ packageLinkParserWithAuthorName
+            |> Url.Parser.map
+                (\author name ->
+                    PackagesTarget
+                        { name = author ++ "/" ++ name
+                        , subTarget = VersionsSubTarget
+                        }
+                )
+        , packageLinkParserWithAuthorNameVersion
+            |> Url.Parser.map
+                (\author name version ->
+                    PackagesTarget
+                        { name = author ++ "/" ++ name
+                        , subTarget = ReadmeSubTarget version
+                        }
+                )
+        , packageLinkParserWithAuthorNameVersionModule
+            |> Url.Parser.map
+                (\author name version module_ _ ->
+                    PackagesTarget
+                        { name = author ++ "/" ++ name
+                        , subTarget =
+                            module_
+                                |> String.split "-"
+                                |> ModuleSubTarget version
+                        }
+                )
+        ]
+
+
+packageLinkParserWithAuthorNameVersionModule : Url.Parser.Parser (String -> String -> String -> String -> Maybe String -> a) a
+packageLinkParserWithAuthorNameVersionModule =
+    packageLinkParserWithAuthorNameVersion
+        </> Url.Parser.string
+        </> Url.Parser.fragment identity
+
+
+packageLinkParserWithAuthorNameVersion : Url.Parser.Parser (String -> String -> String -> a) a
+packageLinkParserWithAuthorNameVersion =
+    packageLinkParserWithAuthorName
+        </> Url.Parser.string
+
+
+packageLinkParserWithAuthorName : Url.Parser.Parser (String -> String -> a) a
+packageLinkParserWithAuthorName =
+    Url.Parser.s "packages"
+        </> Url.Parser.string
+        </> Url.Parser.string
 
 
 ignoreDotSlash : Parser Bool

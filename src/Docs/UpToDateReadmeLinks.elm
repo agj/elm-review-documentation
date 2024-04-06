@@ -149,6 +149,7 @@ reportError context readmeKey (Node range link) =
 
         Link.PackagesTarget { name, subTarget } ->
             let
+                linkVersion : Maybe String
                 linkVersion =
                     Link.subTargetVersion subTarget
             in

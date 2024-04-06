@@ -634,6 +634,7 @@ reportErrorsForPackagesTarget projectContext sectionsPerModule fileLinksAndSecti
         ( Just currentPackage, _ ) ->
             -- Package project
             let
+                version : Maybe String
                 version =
                     Link.subTargetVersion subTarget
             in
@@ -662,10 +663,10 @@ reportErrorsForPackagesTarget projectContext sectionsPerModule fileLinksAndSecti
 reportErrorForCurrentPackageSubTarget : ProjectContext -> Dict ModuleName (List Section) -> FileLinksAndSections -> MaybeExposedLinkData -> Link.SubTarget -> Maybe (Rule.Error scope)
 reportErrorForCurrentPackageSubTarget projectContext sectionsPerModule fileLinksAndSections maybeExposedLink subTarget =
     case subTarget of
-        Link.ModuleSubTarget version moduleName ->
+        Link.ModuleSubTarget _ moduleName ->
             reportErrorForModule projectContext sectionsPerModule fileLinksAndSections maybeExposedLink moduleName
 
-        Link.ReadmeSubTarget version ->
+        Link.ReadmeSubTarget _ ->
             reportErrorForReadme sectionsPerModule fileLinksAndSections.fileKey maybeExposedLink
 
         Link.VersionsSubTarget ->
